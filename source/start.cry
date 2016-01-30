@@ -1,0 +1,31 @@
+FPS = 30;
+SCREEN_WIDTH = 960;
+SCREEN_HEIGHT = 600;
+
+import 'enums.cry';
+import 'util.cry';
+
+import 'scenes/init.cry';
+import 'scenes/Event.cry';
+import 'scenes/TitleScene.cry';
+
+function main() {
+	$game_initialize(FPS);
+	$game_initialize_screen(SCREEN_WIDTH, SCREEN_HEIGHT);
+	$game_set_title("???");
+	
+	events = [];
+	
+	while (true) {
+		events.clear();
+		for (event : $game_pump_events()) {
+			if (event.is_quit) {
+				return;
+			}
+		}
+		
+		
+	}
+}
+
+main();
