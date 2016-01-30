@@ -1,0 +1,122 @@
+/*
+	font names are permutations of "{color}-{size}"
+	where color is:
+	- black
+	- white
+	
+	and size is a t-shirt size:
+	- XXS
+	- XS
+	- S
+	- M
+	- L
+	- XL
+	- XXL
+	
+	e.g.
+	black-XL
+*/
+
+FILES_BY_CHAR = {
+	'&': 'am',
+	"'": 'ap',
+	'*': 'as',
+	'@': 'at',
+	'\\': 'bs',
+	'`': 'bt',
+	'>': 'ca',
+	'}': 'cc',
+	',': 'cm',
+	':': 'co',
+	')': 'cp',
+	'^': 'cr',
+	']': 'cs',
+	'"': 'dq',
+	'=': 'eq',
+	'!': 'ex',
+	'#': 'ha',
+	'-': 'hy',
+	'$': 'mo',
+	'<': 'oa',
+	'{': 'oc',
+	'(': 'op',
+	'[': 'os',
+	'%': 'pe',
+	'|': 'pi',
+	'.': 'pr',
+	'+': 'pu',
+	'?': 'qu',
+	';': 'sc',
+	'/': 'sl',
+	'~': 'ti',
+	'_': 'un',
+};
+
+for (char : 'abcdefghijklmnopqrstuvwxyz') {
+	FILES_BY_CHAR[char.upper()] = 'up_' + char;
+	FILES_BY_CHAR[char] = 'low_' + char;
+}
+
+for (i = 0; i <= 9; ++i) {
+	FILES_BY_CHAR[i + ''] = 'num_' + i;
+}
+
+LETTER_SIZE_RATIOS = {
+	'XXS' : 1,
+	'XS' : 1.5,
+	'S': 2,
+	'M': 3,
+	'L': 4,
+	'XL': 5,
+	'XXL': 7,
+};
+
+class TextEngine {
+	constructor() {
+		this.letters_by_font = {};
+		this.reusable_out_coord = [0, 0];
+	}
+	
+	function render(font, text, x, y) {
+		letters = this.letters_by_font.get(font, null);
+		if (letters == null) {
+			canonical_font = font.lower();
+			letters = this.letters_by_font.get(canonical_font, null);
+			if (letters != null) {
+				this.letters_by_font[font] = letters;
+			} else {
+				parts = canonical_font.split('-');
+				color = parts[0];
+				size = parts[1].upper();
+				letters = {};
+				ratio = LETTER_SIZE_RATIOS[size];
+				for (char : FILES_BY_CHAR.keys()) {
+					img = IMAGES.get_at_scale('text/' + color + '/' + FILES_BY_CHAR[char] + '.png', ratio);
+					letters[char] = img;
+				}
+				this.letters_by_font[font] = letters;
+				this.letters_by_font[canonical_font] = letters;
+			}
+		}
+		
+		space_width = letters['X'].width;
+		for (char : text) {
+			if (char == ' ') {
+				x += space_width;
+			} else {
+				img = letters.get(char, null);
+				if (img == null) img = letters['?'];
+				
+				$gfx_blit_image(img, x, y);
+				x += img.width + 1;
+			}
+		}
+		
+		this.reusable_out_coord[0] = x;
+		this.reusable_out_coord[1] = letters['X'].height + y;
+		
+		return this.reusable_out_coord;
+	}
+}
+
+TEXT = new TextEngine();

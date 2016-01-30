@@ -7,6 +7,7 @@ import 'util.cry';
 import 'Event.cry';
 import 'GameContext.cry';
 import 'ImageLibrary.cry';
+import 'TextEngine.cry';
 
 import 'scenes/AbstractScene.cry';
 

@@ -1,3 +1,4 @@
+import 'scenes/GamepadConfigScene.cry';
 import 'scenes/LoadingScene.cry';
 import 'scenes/TitleScene.cry';
 import 'scenes/TraceScene.cry';
