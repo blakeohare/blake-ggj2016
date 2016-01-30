@@ -1,0 +1,43 @@
+class Sprite {
+	constructor(id, x, y) {
+		this.id = id;
+		this.is_monster = id == 'M';
+		this.is_villager = !this.is_monster;
+		this.color = {
+			'M': [128, 80, 0],
+			'V1': [0, 0, 255],
+			'V2': [255, 0, 0],
+			'V3': [0, 128, 0],
+			'V4': [255 ,255, 0],
+			'V5': [255, 128, 0],
+			'V6': [128, 0, 128],
+			'V7': [255, 100, 200],
+		}[id];
+		
+		this.dark_color = [
+			this.color[0] * 2 / 3,
+			this.color[1] * 2 / 3,
+			this.color[2] * 2 / 3,
+		];
+		
+		this.x = x;
+		this.y = y;
+		this.facing = 3.14159 / 2;
+		this.radius = this.is_monster ? .09 : .01;
+		this.window_bounds = null;
+	}
+	
+	function render(rc) {
+		this.draw_circle(this.x, this.y, this.radius, this.radius, this.color);
+	}
+	
+	function draw_circle(x, y, w, h, color) {
+		wb = this.window_bounds;
+		x = $floor(wb[2] * x + wb[0]);
+		y = $floor(wb[3] * y + wb[1]);
+		w = $floor(wb[2] * w);
+		h = $floor(wb[3] * h);
+		$gfx_draw_ellipse(x - w / 2, y - h / 2, w, h, color[0], color[1], color[2], 255);
+	}
+
+}
