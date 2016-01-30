@@ -4,17 +4,25 @@ SCREEN_HEIGHT = 600;
 
 import 'enums.cry';
 import 'util.cry';
+import 'Event.cry';
 
+import 'scenes/AbstractScene.cry';
+
+import 'editor/init.cry';
 import 'scenes/init.cry';
-import 'scenes/Event.cry';
-import 'scenes/TitleScene.cry';
 
 function main() {
 	$game_initialize(FPS);
 	$game_initialize_screen(SCREEN_WIDTH, SCREEN_HEIGHT);
-	$game_set_title("???");
+	$game_set_title("You're a Wizard, Barry!");
 	
 	events = [];
+	
+	//active_scene = new TitleScene();
+	active_scene = new EditorScene();
+	rc = 0;
+	mx = 0;
+	my = 0;
 	
 	while (true) {
 		events.clear();
@@ -22,9 +30,35 @@ function main() {
 			if (event.is_quit) {
 				return;
 			}
+			switch (event.type) {
+				case 'mousemove':
+				case 'mouseleftdown':
+				case 'mouseleftup':
+					mx = event.x;
+					my = event.y;
+					break;
+				default:
+					break;
+			}
+			
+			events.add(event);
 		}
 		
+		active_scene.update(events, mx, my);
+		if (active_scene._quit_requested) {
+			return;
+		}
 		
+		if (active_scene._next != null) {
+			next = active_scene._next;
+			active_scene._next = null;
+			active_scene = next;
+			active_scene._next = null;
+		}
+		
+		active_scene.render(rc++);
+		
+		$game_clock_tick();
 	}
 }
 

@@ -1,0 +1,50 @@
+class EditorScene : AbstractScene {
+
+	constructor() : base() {
+		this.pts = [];
+	}
+	
+	function update(events, mx, my) {
+		for (event : events) {
+			switch (event.type) {
+				case 'mouseleftdown':
+					this.pts.add([1.0 * event.x / SCREEN_WIDTH, 1.0 * event.y / SCREEN_HEIGHT]);
+					break;
+				case 'keydown':
+					if (event.key == 'enter') {
+						$io_file_write_text("path.txt", this.serialize_path());
+					}
+					break;
+			}
+		}
+	}
+	
+	function serialize_path() {
+		output = [];
+		for (pt : this.pts) {
+			row = [];
+			for (p : pt) {
+				row.add($floor(p * 10000) + '');
+			}
+			output.add(row.join(','));
+		}
+		return output.join('|');
+	}
+	
+	function render(rc) {
+		$gfx_fill_screen(0, 0, 0);
+		prev = false;
+		for (pt : this.pts) {
+			x = $floor(pt[0] * SCREEN_WIDTH);
+			y = $floor(pt[1] * SCREEN_HEIGHT);
+			if (prev) {
+				$gfx_draw_line(x, y, px, py, 3, 255, 255, 255, 255);
+			}
+			
+			$gfx_draw_rectangle(x - 5, y  - 5, 10, 10, 255, 255, 255, 255);
+			prev = true;
+			px = x;
+			py = y;
+		}
+	}
+}
