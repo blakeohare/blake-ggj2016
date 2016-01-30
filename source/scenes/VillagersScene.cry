@@ -16,11 +16,39 @@ class VillagersScene : AbstractScene {
 		}
 		
 		this.bounds = [0, 0, SCREEN_WIDTH, SCREEN_HEIGHT];
+		
+		this.device_ids_configured = [];
+		for (i = 0; i < $gamepad_count(); ++i) {
+			device = $gamepad_get_device(i);
+			device_id = device.id;
+			if (device_id != null) {
+				this.device_ids_configured.add(device_id);
+			}
+		}
 	}
 	
 	function update(events, mx, my) {
 		for (event : events) {
-			
+			if (event.is_gamepad && event.name == 'attack') {
+				player_id = event.device.id;
+				if (player_id != null) {
+					sprite = this.sprites_by_id.get(player_id, null);
+					
+				}
+			}
+		}
+		
+		for (player_id : this.device_ids_configured) {
+			dir = $gamepad_get_state(player_id, 'dir');
+			sprite = this.sprites_by_id.get(player_id, null);
+			if (sprite != null) {
+				sprite.dx = dir[0] * .02;
+				sprite.dy = dir[1] * .02;
+			}
+		}
+		
+		for (sprite : this.sprites) {
+			sprite.update();
 		}
 	}
 	

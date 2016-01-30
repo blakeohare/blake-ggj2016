@@ -23,8 +23,20 @@ class Sprite {
 		this.x = x;
 		this.y = y;
 		this.facing = 3.14159 / 2;
-		this.radius = this.is_monster ? .09 : .01;
+		this.radius = this.is_monster ? .12 : .03;
 		this.window_bounds = null;
+		this.dx = 0;
+		this.dy = 0;
+	}
+	
+	function update() {
+		if (this.dx != 0 || this.dy != 0) {
+			new_x = this.x + this.dx;
+			new_y = this.y + this.dy;
+			this.theta = $arctan2(-this.dy, this.dx);
+			this.x = new_x;
+			this.y = new_y;
+		}
 	}
 	
 	function render(rc) {
