@@ -3,6 +3,9 @@
 	where color is:
 	- black
 	- white
+	- red
+	- blue
+	- yellow
 	
 	and size is a t-shirt size:
 	- XXS

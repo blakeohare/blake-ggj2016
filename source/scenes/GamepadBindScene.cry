@@ -1,0 +1,69 @@
+class GamepadBindScene : AbstractScene {
+	constructor(bg, device, player_id, title) : base() {
+		this.bg = bg;
+		this.device = device;
+		this.player_id = player_id;
+		this.title = title;
+		this.phases = ['up', 'down', 'left', 'right', 'APPLY VIOLENCE'];
+		this.current_phase = 0;
+	}
+	
+	function update(events, mx, my) {
+		if (this.current_phase >= this.phases.length) {
+			$gamepad_save_config();
+			this.switch_scene(new GamepadConfigScene());
+		} else {
+			for (event : events) {
+				if (this.current_phase < this.phases.length && 
+					event.is_hardware && 
+					event.device.id == this.player_id && 
+					event.is_significant) {
+					
+					success = false;
+					switch (this.current_phase) {
+						case 0:
+							success = $gamepad_bind_analog_2d(this.device, event.descriptor, 'dir', false, false);
+							break;
+						case 1:
+							success = $gamepad_bind_analog_2d(this.device, event.descriptor, 'dir', false, true);
+							break;
+						case 2:
+							success = $gamepad_bind_analog_2d(this.device, event.descriptor, 'dir', true, false);
+							break;
+						case 3:
+							success = $gamepad_bind_analog_2d(this.device, event.descriptor, 'dir', true, true);
+							break;
+						case 4:
+							success = $gamepad_bind_digital(this.device, event.descriptor, 'attack');
+							break;
+						default: break;	
+					}
+					
+					if (success) {
+						this.current_phase++;
+					}
+				}
+			}
+		}
+	}
+	
+	function render(rc) {
+		this.bg.render(rc);
+		$gfx_draw_rectangle(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, 0, 0, 0, 128);
+		
+		coord = TEXT.render('white-L', "Configuring: ", 10, 10);
+		TEXT.render('yellow-L', this.title, coord[0], 10);
+		
+		if (this.current_phase < this.phases.length) {
+			phase = this.phases[this.current_phase];
+			coord = TEXT.render('white-M', "Push button for: ", 100, 250);
+			if (phase == 'APPLY VIOLENCE') {
+				font = 'red-M';
+			} else {
+				font = 'yellow-M';
+			}
+			
+			TEXT.render(font, phase, coord[0], 250);
+		}
+	}
+}
