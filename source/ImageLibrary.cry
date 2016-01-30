@@ -1,0 +1,37 @@
+class ImageLibrary {
+	constructor() {
+		this.images = {};
+		this.scaled_images_by_scale1000 = {};
+	}
+	
+	function get(path) {
+		img = this.images.get(path, null);
+		if (img == null) {
+			$gfx_image_load_from_resource('t', 'images/' + path);
+			img = $gfx_image_get('t');
+			this.images[path] = img;
+		}
+		return img;
+	}
+	
+	function get_at_scale(path, ratio) {
+		
+		r = $floor(ratio * 1000);
+		lookup = this.scaled_images_by_scale1000.get(r, null);
+		if (lookup == null) {
+			lookup = {};
+			this.scaled_images_by_scale1000[r] = lookup;
+		}
+		
+		img = lookup.get(path, null);
+		if (img == null) {
+			img = this.get(path);
+			img = $gfx_image_scale(img, img.width * r / 1000, img.height * r / 1000);
+			lookup[path] = img;
+		}
+		
+		return img;
+	}
+}
+
+IMAGES = new ImageLibrary();

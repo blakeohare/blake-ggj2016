@@ -1,0 +1,41 @@
+class LoadingScene : AbstractScene {
+	constructor() : base() {
+		this.progress = 0;
+		this.phase = 0;
+	}
+
+	function game_initializer() {
+		//*
+		scene = new TraceScene(null, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+		/*/
+		scene = new EditorScene();
+		//*/
+		return scene;
+	}
+	
+	function update(events, mx, my) {
+		switch (this.phase) {
+			case 0:
+				$gfx_image_sheet_load('everything');
+				this.phase = 1;
+				break;
+			case 1:
+				if ($gfx_image_sheet_loaded('everything')) {
+					this.phase = 2;
+				}
+				this.progress = $gfx_image_sheet_load_progress('everything');
+				break;
+			case 2:
+				this.switch_scene(this.game_initializer());
+				break;
+			default:
+				break;
+		}
+		
+	}
+	
+	function render(rc) {
+		$gfx_fill_screen(0, 0, 0);
+		// TODO: spinner
+	}
+}

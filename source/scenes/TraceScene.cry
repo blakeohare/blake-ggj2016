@@ -1,3 +1,6 @@
+ARM_X = 837;
+ARM_Y = 431;
+
 enum WaypointState {
 	UNTRACED,
 	TRACED,
@@ -8,6 +11,7 @@ enum TraceGameMode {
 	NOT_STARTED,
 	TRACING,
 	FINISHED,
+	FAILURE,
 }
 
 class TraceScene : AbstractScene {
@@ -26,8 +30,38 @@ class TraceScene : AbstractScene {
 			this.pts.add([$floor(pt[0]), $floor(pt[1]), WaypointState.UNTRACED]);
 		}
 		
+		this.last_mouse_x = this.pts[0][0];
+		this.last_mouse_y = this.pts[0][1];
+		
 		this.current_index = -1;
 		this.game_mode = TraceGameMode.NOT_STARTED;
+		
+		this.wizard_image = IMAGES.get_at_scale('wizard.png', .5);
+		this.wand_image = IMAGES.get_at_scale('wand.png', .5);
+	}
+	
+	function find_closest_pt(mx, my) {
+		this.last_mouse_x = mx;
+		this.last_mouse_y = my;
+		
+		start = this.current_index;
+		end = this.current_index + 6;
+		if (start < 0) start = 0;
+		if (end >= this.pts.length) end = this.pts.length - 1;
+		min = 2000000000;
+		min_pt_index = this.current_index;
+		for (i = start; i <= end; ++i) {
+			pt = this.pts[i];
+			dx = mx - pt[0];
+			dy = my - pt[1];
+			dist = dx ** 2 + dy ** 2;
+			if (dist < min) {
+				min = dist;
+				min_pt_index = i;
+			}
+		}
+		
+		return min_pt_index;
 	}
 	
 	function initialize_pts(level) {
@@ -59,6 +93,26 @@ class TraceScene : AbstractScene {
 		return expanded_points;
 	}
 	
+	function create_curve(x1, y1, x2, y2, x3, y3) {
+		original = [[x1, y1], [x2, y2], [x3, y3]];
+		
+		for (g = 1; g <= 4; ++g) {
+			interpolated = [original[0]];
+			half = original.length / 2;
+			for (i = 1; i < original.length; ++i) {
+				left = original[i - 1];
+				right = original[i];
+				x = (left[0] + right[0]) / 2;
+				dy = right[1] - left[1];
+				y = left[1] + dy / 2;
+				interpolated.add([x, y]);
+				interpolated.add(right);
+			}
+			original = interpolated;
+		}
+		return original;
+	}
+	
 	function update(events, mx, my) {
 		switch (this.game_mode) {
 			case TraceGameMode.NOT_STARTED:
@@ -68,10 +122,38 @@ class TraceScene : AbstractScene {
 				dist = dx ** 2 + dy ** 2;
 				if (dist < (10) ** 2) {
 					this.game_mode = TraceGameMode.TRACING;
+					this.current_index = 0;
 				}
 				break;
 			case TraceGameMode.TRACING:
-				this.quit_game();
+				closest = this.find_closest_pt(mx, my);
+				this.current_index = closest;
+				pt = this.pts[this.current_index];
+				dx = mx - pt[0];
+				dy = my - pt[1];
+				dist = dx ** 2 + dy ** 2;
+				if (dist > 15 ** 2) {
+					this.game_mode = TraceGameMode.FAILURE;
+					this.failure_counter = 0;
+				}
+				if (this.current_index == this.pts.length - 1) {
+					this.game_mode = TraceGameMode.FINISHED;
+					this.finished_counter = 0;
+				}
+				break;
+			case TraceGameMode.FAILURE:
+				this.failure_counter += 3;
+				if (this.failure_counter > 100) {
+					this.game_mode = TraceGameMode.NOT_STARTED;
+					this.current_index = -1;
+				}
+				break;
+			case TraceGameMode.FINISHED:
+				this.finished_counter++;
+				if (this.finished_counter > 100) {
+					this.current_index = -1;
+					this.game_mode = TraceGameMode.NOT_STARTED;
+				}
 				break;
 			default:
 				break;
@@ -81,15 +163,101 @@ class TraceScene : AbstractScene {
 	
 	function render(rc) {
 		$gfx_fill_screen(40, 40, 40);
+		
+		$gfx_blit_image(this.wizard_image, this.right - this.wizard_image.width, this.bottom - this.wizard_image.height);
+		
+		wand_box_left = ARM_X - 100;
+		wand_box_top = ARM_Y - 80;
+		wand_box_width = 100;
+		wand_box_height = 100;
+		rx = 1.0 * (this.last_mouse_x - this.left) / this.width;
+		ry = 1.0 * (this.last_mouse_y - this.top) / this.height;
+		wand_x = $floor(rx * wand_box_width) + wand_box_left;
+		wand_y = $floor(ry * wand_box_height) + wand_box_top;
+		
+		elbow_x = (wand_x + ARM_X) / 2;
+		elbow_y = (wand_y + ARM_Y) / 2 + 20;
+		
+		arm_points = this.create_curve(wand_x, wand_y, elbow_x, elbow_y, ARM_X, ARM_Y);
+		
+		for (i = arm_points.length - 1; i > 0; --i) {
+			left = arm_points[i - 1];
+			right = arm_points[i];
+			$gfx_draw_line(left[0], left[1], right[0], right[1], 3, 255, 255, 255, 255);
+		}
+		
+		$gfx_blit_image(this.wand_image, wand_x - this.wand_image.width + 5, wand_y - this.wand_image.height + 5);
+		
 		width = this.width;
 		height = this.height;
 		left = this.left;
 		top = this.top;
 		
-		for (pt : this.pts) {
+		switch (this.game_mode) {
+			case TraceGameMode.NOT_STARTED:
+				sorted_points = this.generate_sorted_points(0);
+				break;
+			case TraceGameMode.TRACING:
+			case TraceGameMode.FAILURE:
+				sorted_points = this.generate_sorted_points(this.current_index);
+				break;
+			case TraceGameMode.FINISHED:
+				sorted_points = this.generate_sorted_points(this.pts.length - 1);
+				break;
+			default:
+				$assert(false, 'error');
+				break;
+		}
+		
+		for (i = sorted_points.length - 1; i >= 0; --i) {
+			pt = sorted_points[i];
 			x = pt[0] + left - 15;
 			y = pt[1] + top - 15;
-			$gfx_draw_ellipse(x, y, 30, 30, 255, 255, 0, 255);
+			r = 0;
+			g = 0;
+			b = 0;
+			
+			switch (this.game_mode) {
+				case TraceGameMode.NOT_STARTED:
+					if (i <= 15) {
+						g = 255 - $floor(255 * i / 15);
+					}
+					break;
+				case TraceGameMode.TRACING:
+					if (i <= 15) {
+						color = 255 - $floor(255 * i / 15);
+						r = color / 4;
+						g = 2 * color / 3;
+						b = color;
+					}
+					break;
+				case TraceGameMode.FINISHED:
+					r = 255;
+					g = 255;
+					b = 255;
+					break;
+				case TraceGameMode.FAILURE:
+					value = i - this.failure_counter;
+					r = 255 - $floor(255 * value / 15);
+					if (r > 255) r = 255;
+					else if (r < 0) r = 0;
+					break;
+			}
+			$gfx_draw_ellipse(x, y, 30, 30, r, g, b, 255);
 		}
+	}
+	
+	function generate_sorted_points(index) {
+		length = this.pts.length;
+		pts = this.pts;
+		output = [pts[index]];
+		for (i = 1; i < length; ++i) {
+			low = index - i;
+			high = index + i;
+			if (low >= 0) output.add(pts[low]);
+			if (high < length) output.add(pts[high]);
+			
+		}
+		return output;
 	}
 }

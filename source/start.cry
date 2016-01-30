@@ -6,6 +6,7 @@ import 'enums.cry';
 import 'util.cry';
 import 'Event.cry';
 import 'GameContext.cry';
+import 'ImageLibrary.cry';
 
 import 'scenes/AbstractScene.cry';
 
@@ -19,9 +20,7 @@ function main() {
 	
 	events = [];
 	
-	//active_scene = new TitleScene();
-	//active_scene = new EditorScene();
-	active_scene = new TraceScene(null, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+	active_scene = new LoadingScene();
 	
 	rc = 0;
 	mx = 0;
