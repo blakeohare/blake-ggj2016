@@ -1,6 +1,27 @@
 class GameContext {
 	constructor() {
 		this.trace_level = 1;
+		this.config_id_to_game_id = {};
+		this.game_id_to_config_id = {};
+	}
+	
+	function refresh_player_ids() {
+		this.config_id_to_game_id = {};
+		this.game_id_to_config_id = {};
+		gamepads = $gamepad_count();
+		ids = ['M', 'V1', 'V2', 'V3', 'V4', 'V5', 'V6', 'V7'];
+		for (i = 0; i < gamepads; ++i) {
+			device = $gamepad_get_device(i);
+			device_id = device.id;
+			if (device_id != null) {
+				next_id_index = this.game_id_to_config_id.length;
+				if (next_id_index < ids.length) {
+					next_id = ids[next_id_index];
+					this.config_id_to_game_id[device_id] = next_id;
+					this.game_id_to_config_id[next_id] = device_id;
+				}
+			}
+		}
 	}
 }
 

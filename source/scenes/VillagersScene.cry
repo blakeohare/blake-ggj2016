@@ -30,7 +30,7 @@ class VillagersScene : AbstractScene {
 	function update(events, mx, my) {
 		for (event : events) {
 			if (event.is_gamepad && event.name == 'attack') {
-				player_id = event.device.id;
+				player_id = CONTEXT.config_id_to_game_id.get(event.device.id, null);
 				if (player_id != null) {
 					sprite = this.sprites_by_id.get(player_id, null);
 					
@@ -38,12 +38,17 @@ class VillagersScene : AbstractScene {
 			}
 		}
 		
-		for (player_id : this.device_ids_configured) {
-			dir = $gamepad_get_state(player_id, 'dir');
-			sprite = this.sprites_by_id.get(player_id, null);
-			if (sprite != null) {
-				sprite.dx = dir[0] * .02;
-				sprite.dy = dir[1] * .02;
+		for (device_id : this.device_ids_configured) {
+			dir = $gamepad_get_state(device_id, 'dir');
+			
+			player_id = CONTEXT.config_id_to_game_id.get(device_id, null);
+			if (player_id != null) {
+				$print(player_id);
+				sprite = this.sprites_by_id.get(player_id, null);
+				if (sprite != null) {
+					sprite.dx = dir[0] * sprite.v;
+					sprite.dy = dir[1] * sprite.v;
+				}
 			}
 		}
 		

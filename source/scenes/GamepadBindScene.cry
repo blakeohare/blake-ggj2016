@@ -1,8 +1,8 @@
 class GamepadBindScene : AbstractScene {
-	constructor(bg, device, player_id, title) : base() {
+	constructor(bg, device, title) : base() {
 		this.bg = bg;
 		this.device = device;
-		this.player_id = player_id;
+		this.device_id = device.id;
 		this.title = title;
 		this.phases = ['up', 'down', 'left', 'right', 'APPLY VIOLENCE'];
 		this.current_phase = 0;
@@ -11,12 +11,13 @@ class GamepadBindScene : AbstractScene {
 	function update(events, mx, my) {
 		if (this.current_phase >= this.phases.length) {
 			$gamepad_save_config();
+			CONTEXT.refresh_player_ids();
 			this.switch_scene(new GamepadConfigScene());
 		} else {
 			for (event : events) {
 				if (this.current_phase < this.phases.length && 
 					event.is_hardware && 
-					event.device.id == this.player_id && 
+					event.device.id == this.device_id && 
 					event.is_significant) {
 					
 					success = false;

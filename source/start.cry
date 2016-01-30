@@ -21,9 +21,10 @@ function main() {
 	$game_initialize_screen(SCREEN_WIDTH, SCREEN_HEIGHT);
 	$game_set_title("You're a Wizard, Barry!");
 	
-	player_ids = ['M', 'V1', 'V2', 'V3', 'V4', 'V5', 'V6', 'V7'];
-	//player_ids.reverse(); // Crayon bug! player ID's are getting allocated in reverse order.
-	$gamepad_enable_recent(player_ids);
+	// Device ID's don't really matter. They're opaque strings that are allocated to player ID's and there's a lookup table in GameContext.
+	$gamepad_enable_recent(['G1', 'G2', 'G3', 'G4', 'G5', 'G6', 'G7', 'G8', 'G9', 'G10', 'G11', 'G12', 'G13']);
+	
+	CONTEXT.refresh_player_ids();
 	
 	events = [];
 	

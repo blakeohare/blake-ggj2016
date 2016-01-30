@@ -1,10 +1,8 @@
-PLAYER_ALLOCATIONS = ['M', 'V1', 'V2', 'V3', 'V4', 'V5', 'V6', 'V7'];
-
 class GamepadConfigScene : AbstractScene {
 	constructor() : base() {
 		this.devices = [];
 		this.titles = [];
-		this.players = [];
+		this.device_ids = [];
 		
 		this.anim_counter = 0;
 		
@@ -22,8 +20,10 @@ class GamepadConfigScene : AbstractScene {
 	function refresh_player_ids() {
 		this.players = [];
 		for (dev : this.devices) {
-			this.players.add(dev.id);
+			this.device_ids.add(dev.id);
 		}
+		
+		CONTEXT.refresh_player_ids();
 	}
 	
 	function update(events, mx, my) {
@@ -58,23 +58,12 @@ class GamepadConfigScene : AbstractScene {
 				this.switch_scene(new TitleScene());
 			} else {
 				i--;
-				player_id = this.players[i];
-				if (player_id == null || !PLAYER_ALLOCATIONS.contains(player_id)) {
-					player_id = null;
-					for (pid : PLAYER_ALLOCATIONS) {
-						if (!this.players.contains(pid)) {
-							player_id = pid;
-							break;
-						}
-					}
-				}
 				device = this.devices[i];
 				
 				$gamepad_clear_bindings(device);
-				if (player_id != null) {
-					$gamepad_set_id(device, player_id);
-					this.switch_scene(new GamepadBindScene(this, device, player_id, this.titles[i]));
-				}
+				device_id = 'P' + $floor($random() + 2000000000);
+				$gamepad_set_id(device, device_id);
+				this.switch_scene(new GamepadBindScene(this, device, this.titles[i]));
 			}
 		}
 	}
@@ -94,7 +83,8 @@ class GamepadConfigScene : AbstractScene {
 				i = ii - 1;
 				
 				title = this.titles[i];
-				player = this.players[i];
+				device_id = this.device_ids[i];
+				player = CONTEXT.config_id_to_game_id.get(device_id, null);
 				coord = TEXT.render('white-M', '#' + (i + 1) + ': ', x, y);
 				x = coord[0];
 				if (player == 'M') {
