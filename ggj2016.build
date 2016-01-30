@@ -1,5 +1,5 @@
 <build>
-  <projectname>GGJ Game</projectname>
+  <projectname>GGJ</projectname>
   <source>source/</source>
   <output>output/%TARGET_NAME%</output>
 

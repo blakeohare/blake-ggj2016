@@ -1,0 +1,95 @@
+enum WaypointState {
+	UNTRACED,
+	TRACED,
+	
+}
+
+enum TraceGameMode {
+	NOT_STARTED,
+	TRACING,
+	FINISHED,
+}
+
+class TraceScene : AbstractScene {
+	constructor(bg, x, y, width, height) : base() {
+		this.left = x;
+		this.top = y;
+		this.right = x + width;
+		this.bottom = y + height;
+		this.width = width;
+		this.height = height;
+		this.bg = bg;
+		
+		pts = this.initialize_pts(CONTEXT.trace_level);
+		this.pts = [];
+		for (pt : pts) {
+			this.pts.add([$floor(pt[0]), $floor(pt[1]), WaypointState.UNTRACED]);
+		}
+		
+		this.current_index = -1;
+		this.game_mode = TraceGameMode.NOT_STARTED;
+	}
+	
+	function initialize_pts(level) {
+		pts = $resource_read_text('patterns/' + level + '.txt').split('|');
+		output = [];
+		for (pt : pts) {
+			pt = pt.split(',');
+			pt = [$parse_int(pt[0]) * this.width / 10000 , $parse_int(pt[1]) * this.height / 10000];
+			output.add(pt);
+		}
+		pts = output;
+		
+		expanded_points = [pts[0]];
+		for (i = 1; i < pts.length; ++i) {
+			prev = expanded_points[-1];
+			next = pts[i];
+			dx = prev[0] - next[0];
+			dy = prev[1] - next[1];
+			dist = dx ** 2 + dy ** 2;
+			if (dist > (15) ** 2) {
+				inserted_pt = [(prev[0] + next[0]) / 2.0, (prev[1] + next[1]) / 2.0];
+				pts.insert(i, inserted_pt);
+				--i;
+			} else {
+				expanded_points.add(next);
+			}
+		}
+		
+		return expanded_points;
+	}
+	
+	function update(events, mx, my) {
+		switch (this.game_mode) {
+			case TraceGameMode.NOT_STARTED:
+				start = this.pts[0];
+				dx = mx - start[0];
+				dy = my - start[1];
+				dist = dx ** 2 + dy ** 2;
+				if (dist < (10) ** 2) {
+					this.game_mode = TraceGameMode.TRACING;
+				}
+				break;
+			case TraceGameMode.TRACING:
+				this.quit_game();
+				break;
+			default:
+				break;
+		}
+		
+	}
+	
+	function render(rc) {
+		$gfx_fill_screen(40, 40, 40);
+		width = this.width;
+		height = this.height;
+		left = this.left;
+		top = this.top;
+		
+		for (pt : this.pts) {
+			x = pt[0] + left - 15;
+			y = pt[1] + top - 15;
+			$gfx_draw_ellipse(x, y, 30, 30, 255, 255, 0, 255);
+		}
+	}
+}

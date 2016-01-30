@@ -4,6 +4,14 @@ class AbstractScene {
 		this._quit_requested = false;
 	}
 	
+	function switch_scene(scene) {
+		this._next = scene;
+	}
+	
+	function quit_game() {
+		this._quit_requested = true;
+	}
+	
 	function update(events, mx, my) {
 		$assert(false, "Override me!");
 	}

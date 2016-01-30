@@ -1,0 +1,7 @@
+class GameContext {
+	constructor() {
+		this.trace_level = 1;
+	}
+}
+
+CONTEXT = new GameContext();

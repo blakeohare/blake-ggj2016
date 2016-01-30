@@ -1,1 +1,2 @@
 import 'scenes/TitleScene.cry';
+import 'scenes/TraceScene.cry';

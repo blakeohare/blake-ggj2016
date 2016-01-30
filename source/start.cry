@@ -5,6 +5,7 @@ SCREEN_HEIGHT = 600;
 import 'enums.cry';
 import 'util.cry';
 import 'Event.cry';
+import 'GameContext.cry';
 
 import 'scenes/AbstractScene.cry';
 
@@ -19,7 +20,9 @@ function main() {
 	events = [];
 	
 	//active_scene = new TitleScene();
-	active_scene = new EditorScene();
+	//active_scene = new EditorScene();
+	active_scene = new TraceScene(null, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+	
 	rc = 0;
 	mx = 0;
 	my = 0;
