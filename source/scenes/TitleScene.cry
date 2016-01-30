@@ -1,13 +1,65 @@
 class TitleScene : AbstractScene {
+
 	constructor() : base() {
+		this.buttons = [
+			['Play', 100, 100, this.play_click],
+			['Gamepad Config', 100, 200, this.gamepad_config_click],
+		];
 		
+		this.current_index = 0;
+		this.anim_counter = 0;
+	}
+	
+	function play_click() {
+		this.switch_scene(new VillagersScene());
+	}
+	
+	function gamepad_config_click() {
+		this.switch_scene(new GamepadConfigScene());
 	}
 	
 	function update(events, mx, my) {
+		old = this.current_index;
+		enter_pressed = false;
+		for (event : events) {
+			switch (event.type) {
+				case 'keydown':
+					if (event.key == 'up') {
+						this.current_index--;
+					} else if (event.key == 'down') {
+						this.current_index++;
+					} else if (event.key == 'enter') {
+						enter_pressed = true;
+					}
+					break;
+			}
+		}
 		
+		if (this.current_index < 0) this.current_index = 0;
+		else if (this.current_index >= this.buttons.length) this.current_index = this.buttons.length - 1;
+		
+		if (old != this.current_index) {
+			this.anim_counter = 0;
+		}
+		
+		if (enter_pressed) {
+			this.buttons[this.current_index][3]();
+		}
 	}
 	
 	function render(rc) {
 		$gfx_fill_screen(0, 0, 255);
+		
+		this.anim_counter++;
+		
+		for (i = 0; i < this.buttons.length; ++i) {
+			button = this.buttons[i];
+			TEXT.render('white-L', button[0], button[1], button[2]);
+			if (i == this.current_index) {
+				x = button[1] - 40;
+				y = button[2] - $floor($abs($sin(this.anim_counter * 2 * 3.14159 / FPS * 1.3) * 30)) + 20;
+				$gfx_draw_rectangle(x, y, 20, 20, 255, 255, 0, 255);
+			}
+		}
 	}
 }
