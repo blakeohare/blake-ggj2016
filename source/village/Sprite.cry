@@ -10,6 +10,8 @@ class Sprite {
 		this.is_projectile = this.is_fire || this.is_spear;
 		this.is_villager = !this.is_monster && !this.is_projectile;
 		
+		this.target_coord = null;
+		
 		this.fire_colors = [
 			[255, 255, 0],
 			[255, 192, 0],
@@ -79,9 +81,27 @@ class Sprite {
 		
 		this.spear_cooldown = -1;
 		this.damage_counter = -1;
+		
+		this.z_offset = 0;
 	}
 	
 	function update() {
+	
+		if (this.target_coord != null) {
+			dx = this.target_coord[0] - this.x;
+			dy = this.target_coord[1] - this.y;
+			dist = (dx ** 2 + dy ** 2) ** .5;
+			if (dist < this.v) {
+				this.x = this.target_coord[0];
+				this.y = this.target_coord[1];
+				this.target_coord = null;
+			} else {
+				ux = dx / dist;
+				uy = dy / dist;
+				this.dx = ux * this.v;
+				this.dy = uy * this.v;
+			}
+		}
 	
 		if (this.is_fire) {
 			this.life_percent -= .06;
@@ -188,15 +208,17 @@ class Sprite {
 						default:
 							break;
 					}
-					$gfx_blit_image(img, x, y);
+					$gfx_blit_image(img, x, y - this.z_offset);
 				}
 			} else if (this.is_villager && this.on_fire_counter > 0) {
-				ax = this.x - VILLAGER_RADIUS * .8;
-				cx = this.x + VILLAGER_RADIUS * .8;
-				ay = this.y - VILLAGER_RADIUS * 3.2;
+				x = this.x;
+				y = this.y;
+				ax = x - VILLAGER_RADIUS * .8;
+				cx = x + VILLAGER_RADIUS * .8;
+				ay = y - VILLAGER_RADIUS * 3.2;
 				cy = ay;
-				bx = this.x;
-				by = this.y - VILLAGER_RADIUS * 3.7;
+				bx = x;
+				by = y - VILLAGER_RADIUS * 3.7;
 				
 				fr = VILLAGER_RADIUS / 1.5;
 				for (xy : [[ax, ay], [bx, by], [cx, cy]]) {
@@ -219,6 +241,6 @@ class Sprite {
 		y = $floor(wb[3] * y + wb[1]);
 		nw = $floor(wb[2] * w);
 		nh = $floor(nw * h / w);
-		$gfx_draw_ellipse(x - nw / 2, y - nh / 2, nw, nh, color[0], color[1], color[2], 255);
+		$gfx_draw_ellipse(x - nw / 2, y - nh / 2 - this.z_offset, nw, nh, color[0], color[1], color[2], 255);
 	}
 }

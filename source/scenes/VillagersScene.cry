@@ -7,6 +7,8 @@ class VillagersScene : AbstractScene {
 	constructor(enable_wizard) : base() {
 		this.is_both = enable_wizard;
 		this.monster = new Sprite('M', MONSTER_START[0], MONSTER_START[1]);
+		this.screen_shake_offset = 0;
+		this.overlay = null;
 		
 		this.villagers = [];
 		for (i = 1; i <= VILLAGER_COUNT; ++i) {
@@ -73,6 +75,11 @@ class VillagersScene : AbstractScene {
 		
 	}
 	
+	function set_state(state) {
+		this.state = state;
+		this.state_counter = 0;
+	}
+	
 	function update(events, mx, my) {
 	
 		allow_input = true;
@@ -82,17 +89,98 @@ class VillagersScene : AbstractScene {
 				if (this.state_counter == 10) {
 					SOUNDS.play_sound('sounds/test.ogg');
 				}
+				i = 0;
+				for (villager : this.villagers) {
+					villager.z_offset = $floor($abs($cos(this.counter * TWO_PI / (2 * FPS) + (i % 2 == 0 ? 0 : 1) * (PI / 4))) * 20);
+					++i;
+				}
+				
+				if (this.state_counter == FPS) {
+					this.overlay = [
+						'Here we have the people of the _____ tribe,',
+						'performing their ritual dance to appease Molikaw',
+						'Niwatanthatu\'a, the lord of the volcano.'];
+				} else if (this.state_counter == FPS * 10) {
+					this.overlay = [
+						'They perform this dance whenever Molikaw',
+						'Niwatanthatu\'a gets angry, which occurs every',
+						'Tuesday.'
+						];
+				} else if (this.state_counter == FPS * 15) {
+					this.overlay = [
+						'Which is coincidentally when the cruise ships',
+						'generally arrive.',
+					];
+				} else if (this.state_counter == FPS * 20) {
+					this.overlay = null;
+					this.set_state(VillageState.TRIP_FALL);
+				}
+				
 				break;
 			case VillageState.TRIP_FALL:
+				
+				if (this.state_counter == FPS) {
+					this.overlay = [
+						'One villager falls over. This has displeased',
+						'Molikaw Niwatanthatu\'a and so he emerges from',
+						'his cave in the foulest of moods.'
+					];
+				} else if (this.state_counter == FPS * 6) {
+					this.overlay = null;
+					this.set_state(VillageState.SCREEN_SHAKE);
+				}
+				
+				i = 0;
+				for (villager : this.villagers) {
+					if (i == 3) {
+						villager.z_offset = villager.z_offset * 4 / 5;
+					} else {
+						villager.z_offset = $floor($abs($cos(this.counter * TWO_PI / (2 * FPS) + (i % 2 == 0 ? 0 : 1) * (PI / 4))) * 20);
+					}
+					++i;
+				}
+				
 				allow_input = false;
 				break;
 			case VillageState.SCREEN_SHAKE:
+				if (this.state_counter == FPS * 3) {
+					this.set_state(VillageState.MONSTER_EMERGE);
+				}
+				
+				for (villager : this.villagers) {
+					villager.z_offset = villager.z_offset * 19 / 20;
+				}
+				
+				this.screen_shake_offset = $floor($sin(this.state_counter * TWO_PI / 5) * 10);
 				allow_input = false;
 				break;
 			case VillageState.MONSTER_EMERGE:
 				allow_input = false;
+				this.screen_shake_offset = 0;
+				
+				if (this.state_counter < 2) {
+					this.monster.target_coord = [.5, .595];
+				} else {
+					if (this.monster.target_coord == null) {
+						this.set_state(VillageState.FIGHT);
+					}
+				}
 				break;
-			case VillageState.FIGHT:
+			case VillageState.FIGHT_START:
+				allow_input = true;
+				if (this.state_counter == 1) {
+					this.overlay = [
+						'Now the villagers must throw their spears with',
+						'the A button and drive the volcano lord back to',
+						'his cave.'
+						];
+				} else if (this.state_counter == FPS * 6) {
+					this.overlay = null;
+					this.set_state(VillageState.FIGHT_NO_WIZARD);
+				}
+				break;
+			case VillageState.FIGHT_NO_WIZARD:
+				
 				break;
 			case VillageState.FIGHT_PRE_WIZARD:
 				break;
@@ -114,31 +202,33 @@ class VillagersScene : AbstractScene {
 				break;
 		}
 	
-		for (event : events) {
-			if (event.is_gamepad && event.name == 'attack') {
-				player_id = CONTEXT.config_id_to_game_id.get(event.device.id, null);
-				if (player_id != null) {
-					sprite = this.sprites_by_id.get(player_id, null);
-					if (sprite.is_monster) {
-						sprite.is_attacking = event.value;
-					} else if (sprite.is_villager) {
-						if (event.value && sprite.spear_cooldown < 0) {
-							this.throw_spear(sprite);
+		if (allow_input) {
+			for (event : events) {
+				if (event.is_gamepad && event.name == 'attack') {
+					player_id = CONTEXT.config_id_to_game_id.get(event.device.id, null);
+					if (player_id != null) {
+						sprite = this.sprites_by_id.get(player_id, null);
+						if (sprite.is_monster) {
+							sprite.is_attacking = event.value;
+						} else if (sprite.is_villager) {
+							if (event.value && sprite.spear_cooldown < 0) {
+								this.throw_spear(sprite);
+							}
 						}
 					}
 				}
 			}
-		}
-		
-		for (device_id : this.device_ids_configured) {
-			dir = $gamepad_get_state(device_id, 'dir');
 			
-			player_id = CONTEXT.config_id_to_game_id.get(device_id, null);
-			if (player_id != null) {
-				sprite = this.sprites_by_id.get(player_id, null);
-				if (sprite != null) {
-					sprite.dx = dir[0] * sprite.v;
-					sprite.dy = dir[1] * sprite.v;
+			for (device_id : this.device_ids_configured) {
+				dir = $gamepad_get_state(device_id, 'dir');
+				
+				player_id = CONTEXT.config_id_to_game_id.get(device_id, null);
+				if (player_id != null) {
+					sprite = this.sprites_by_id.get(player_id, null);
+					if (sprite != null) {
+						sprite.dx = dir[0] * sprite.v;
+						sprite.dy = dir[1] * sprite.v;
+					}
 				}
 			}
 		}
@@ -266,9 +356,11 @@ class VillagersScene : AbstractScene {
 	}
 	
 	function render(rc) {
-		$gfx_blit_image(this.bg, 0, 0);
+		$gfx_blit_image(this.bg, this.screen_shake_offset, 0);
 		
 		sorted_sprites = this.quick_sort(this.sprites);
+		
+		this.bounds[0] = this.screen_shake_offset;
 		
 		for (sprite : sorted_sprites) {
 			sprite.window_bounds = this.bounds;
@@ -276,6 +368,17 @@ class VillagersScene : AbstractScene {
 		}
 		
 		this.render_hud();
+		
+		if (this.overlay != null) {
+			x = 30;
+			y = 60;
+			
+			$gfx_draw_rectangle(0, y, SCREEN_WIDTH, 120, 255, 255, 255, 100);
+			for (line : this.overlay) {
+				coord = TEXT.render('black-M', line, x, y);
+				y = coord[1];
+			}
+		}
 	}
 	
 	function quick_sort(sprites) {
