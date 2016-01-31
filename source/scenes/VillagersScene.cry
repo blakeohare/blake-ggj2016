@@ -6,6 +6,7 @@ MONSTER_START = [.5, 234.0 / SCREEN_HEIGHT];
 class VillagersScene : AbstractScene {
 	constructor(enable_wizard) : base() {
 		this.is_both = enable_wizard;
+		this.show_bg_overlay = true;
 		this.monster = new Sprite('M', MONSTER_START[0], MONSTER_START[1]);
 		this.screen_shake_offset = 0;
 		this.overlay = null;
@@ -38,6 +39,7 @@ class VillagersScene : AbstractScene {
 		}
 		
 		this.bg = IMAGES.get('island.png');
+		this.bg_overlay = IMAGES.get('island-overlay.png');
 		
 		this.monster.faces = {
 			'normal': {
@@ -85,6 +87,7 @@ class VillagersScene : AbstractScene {
 		allow_input = true;
 		switch (this.state) {
 			case VillageState.INITIAL_DANCE:
+				this.show_bg_overlay = true;
 				allow_input = false;
 				if (this.state_counter == 10) {
 					SOUNDS.play_sound('sounds/test.ogg');
@@ -162,11 +165,12 @@ class VillagersScene : AbstractScene {
 					this.monster.target_coord = [.5, .595];
 				} else {
 					if (this.monster.target_coord == null) {
-						this.set_state(VillageState.FIGHT);
+						this.set_state(VillageState.FIGHT_START);
 					}
 				}
 				break;
 			case VillageState.FIGHT_START:
+				this.show_bg_overlay = false;
 				allow_input = true;
 				if (this.state_counter == 1) {
 					this.overlay = [
@@ -365,6 +369,10 @@ class VillagersScene : AbstractScene {
 		for (sprite : sorted_sprites) {
 			sprite.window_bounds = this.bounds;
 			sprite.render(rc);
+		}
+		
+		if (this.show_bg_overlay) {
+			$gfx_blit_image(this.bg_overlay, this.screen_shake_offset, 0);
 		}
 		
 		this.render_hud();
