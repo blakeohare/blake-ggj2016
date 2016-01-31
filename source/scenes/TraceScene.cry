@@ -16,6 +16,7 @@ enum TraceGameMode {
 
 class TraceScene : AbstractScene {
 	constructor(bg, x, y, width, height) : base() {
+		this.village_mode = bg != null;
 		this.left = x;
 		this.top = y;
 		this.right = x + width;
@@ -41,6 +42,7 @@ class TraceScene : AbstractScene {
 	}
 	
 	function find_closest_pt(mx, my) {
+		
 		this.last_mouse_x = mx;
 		this.last_mouse_y = my;
 		
@@ -114,6 +116,11 @@ class TraceScene : AbstractScene {
 	}
 	
 	function update(events, mx, my) {
+	
+		if (this.village_mode) {
+			this.bg.update(events, mx, my);
+		}
+	
 		switch (this.game_mode) {
 			case TraceGameMode.NOT_STARTED:
 				start = this.pts[0];
@@ -162,31 +169,38 @@ class TraceScene : AbstractScene {
 	}
 	
 	function render(rc) {
-		$gfx_fill_screen(40, 40, 40);
-		
-		$gfx_blit_image(this.wizard_image, this.right - this.wizard_image.width, this.bottom - this.wizard_image.height);
-		
-		wand_box_left = ARM_X - 100;
-		wand_box_top = ARM_Y - 80;
-		wand_box_width = 100;
-		wand_box_height = 100;
-		rx = 1.0 * (this.last_mouse_x - this.left) / this.width;
-		ry = 1.0 * (this.last_mouse_y - this.top) / this.height;
-		wand_x = $floor(rx * wand_box_width) + wand_box_left;
-		wand_y = $floor(ry * wand_box_height) + wand_box_top;
-		
-		elbow_x = (wand_x + ARM_X) / 2;
-		elbow_y = (wand_y + ARM_Y) / 2 + 20;
-		
-		arm_points = this.create_curve(wand_x, wand_y, elbow_x, elbow_y, ARM_X, ARM_Y);
-		
-		for (i = arm_points.length - 1; i > 0; --i) {
-			left = arm_points[i - 1];
-			right = arm_points[i];
-			$gfx_draw_line(left[0], left[1], right[0], right[1], 3, 255, 255, 255, 255);
+	
+		if (this.village_mode) {
+			this.bg.render(rc);
+		} else {
+			$gfx_fill_screen(40, 40, 40);
 		}
 		
-		$gfx_blit_image(this.wand_image, wand_x - this.wand_image.width + 5, wand_y - this.wand_image.height + 5);
+		if (!this.village_mode) {
+			$gfx_blit_image(this.wizard_image, this.right - this.wizard_image.width, this.bottom - this.wizard_image.height);
+			
+			wand_box_left = ARM_X - 100;
+			wand_box_top = ARM_Y - 80;
+			wand_box_width = 100;
+			wand_box_height = 100;
+			rx = 1.0 * (this.last_mouse_x - this.left) / this.width;
+			ry = 1.0 * (this.last_mouse_y - this.top) / this.height;
+			wand_x = $floor(rx * wand_box_width) + wand_box_left;
+			wand_y = $floor(ry * wand_box_height) + wand_box_top;
+			
+			elbow_x = (wand_x + ARM_X) / 2;
+			elbow_y = (wand_y + ARM_Y) / 2 + 20;
+			
+			arm_points = this.create_curve(wand_x, wand_y, elbow_x, elbow_y, ARM_X, ARM_Y);
+			
+			for (i = arm_points.length - 1; i > 0; --i) {
+				left = arm_points[i - 1];
+				right = arm_points[i];
+				$gfx_draw_line(left[0], left[1], right[0], right[1], 3, 255, 255, 255, 255);
+			}
+			
+			$gfx_blit_image(this.wand_image, wand_x - this.wand_image.width + 5, wand_y - this.wand_image.height + 5);
+		}
 		
 		width = this.width;
 		height = this.height;

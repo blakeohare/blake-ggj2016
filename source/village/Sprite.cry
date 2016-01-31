@@ -8,9 +8,11 @@ class Sprite {
 		this.is_spear = id == 'spear';
 		this.is_fire = id == 'fire';
 		this.is_projectile = this.is_fire || this.is_spear;
-		this.is_villager = !this.is_monster && !this.is_projectile;
+		this.is_villager = !this.is_monster && !this.is_projectile; // note that the wizard is counted as a villager in most places.
+		this.is_wizard = this.id == 'V13'; // but not all places
 		
 		this.target_coord = null;
+		this.invincible = false;
 		
 		this.fire_colors = [
 			[255, 255, 0],
@@ -37,6 +39,7 @@ class Sprite {
 			'V10': [0, 0, 0],
 			'V11': [40, 255, 40],
 			'V12': [128, 30, 0],
+			'V13': [128, 0, 128],
 		}[id];
 		
 		this.dark_color = [
@@ -183,6 +186,16 @@ class Sprite {
 				}
 			}
 			this.draw_ellipse(this.x, this.y - this.radius * 2, this.radius * 2, this.radius * 2, color);
+			if (this.is_wizard) {
+				coord = this.convert_coord(this.x, this.y);
+				x = coord[0];
+				y = coord[1] - 30 - this.z_offset;
+				$gfx_draw_triangle(
+					x, y - 15,
+					x - 10, y,
+					x + 10, y,
+					64, 0, 64, 255);
+			}
 			if (this.is_monster) {
 				//this.draw_ellipse(this.x, this.y - this.radius, this.radius / 2, this.radius / 2, this.color);
 				

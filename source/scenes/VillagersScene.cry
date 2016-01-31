@@ -6,6 +6,8 @@ MONSTER_START = [.5, 234.0 / SCREEN_HEIGHT];
 class VillagersScene : AbstractScene {
 	constructor(enable_wizard) : base() {
 		this.is_both = enable_wizard;
+		this.enable_wizard = enable_wizard;
+		
 		this.show_bg_overlay = true;
 		this.monster = new Sprite('M', MONSTER_START[0], MONSTER_START[1]);
 		this.screen_shake_offset = 0;
@@ -15,6 +17,7 @@ class VillagersScene : AbstractScene {
 		for (i = 1; i <= VILLAGER_COUNT; ++i) {
 			this.villagers.add(new Sprite('V' + i, .1 + i / (3.0 + VILLAGER_COUNT), .7));
 		}
+		this.wizard = null;
 		
 		this.state = VillageState.INITIAL_DANCE;
 		this.state_counter = 0;
@@ -184,18 +187,73 @@ class VillagersScene : AbstractScene {
 				}
 				break;
 			case VillageState.FIGHT_NO_WIZARD:
-				if (this.monster.life_percent < .001) {
-					this.set_state(VillageState.VILLAGER_WIN);
-					this.monster.target_coord = [.5, .595];
-				} else if (!this.are_any_villagers_alive()) {
+				if (!this.are_any_villagers_alive()) {
 					this.set_state(VillageState.MONSTER_WIN);
-					
+				} else {
+					if (this.enable_wizard) {
+						if (this.monster.life_percent < .5) {
+							this.set_state(VillageState.WIZARD_APPEARS);
+						}
+					} else {
+						if (this.monster.life_percent < .001) {
+							this.set_state(VillageState.VILLAGER_WIN);
+							this.monster.target_coord = [.5, .595];
+						}
+					}
 				}
 				break;
-			case VillageState.FIGHT_PRE_WIZARD:
-				break;
 			case VillageState.WIZARD_APPEARS:
-				allow_input = false;
+				if (this.state_counter == 2) {
+					this.monster.invincible = true;
+					this.overlay = [
+						'Molikaw niwatanthatu\'a has become even more',
+						'enraged and is no longer phased by the spears.'
+					];
+				} else if (this.state_counter == FPS * 5 / CUTSCENE_SPEED_RATIO) {
+					this.overlay = null;
+				} else if (this.state_counter == FPS * 10 / CUTSCENE_SPEED_RATIO) {
+					allow_input = false;
+					this.overlay = [
+						'Suddenly, out of nowhere a Wizard appears to',
+						'aid the villagers. '
+					];
+					// Add wizard sprite.
+					wizard = new Sprite('V13', .9, .8);
+					wizard.z_offset = SCREEN_HEIGHT;
+					this.sprites.add(wizard);
+					this.villagers.add(wizard);
+					this.wizard = wizard;
+				} else if (this.wizard != null && this.wizard.z_offset == 0) {
+					effective_counter = this.state_counter - this.wizard_last_fall;
+					if (effective_counter == FPS / CUTSCENE_SPEED_RATIO) {
+						this.overlay = [
+							'Quickly, the villagers rally around the',
+							'wizard to protect him while he casts his',
+							'spells.'
+						];
+					} else if (effective_counter == FPS * 6 / CUTSCENE_SPEED_RATIO) {
+						this.overlay = [
+							'It is entirely up to the wizard to finish',
+							'casting his spells to defeat Molikaw',
+							'Niwatanthatu\'a.'
+						];
+					} else if (effective_counter == FPS * 12 / CUTSCENE_SPEED_RATIO) {
+						this.overlay = null;
+						// despite switching scenes, the TraceScene will maintain a referene to this scene and continue to 
+						// call update and render in the background.
+						this.switch_scene(new TraceScene(this, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT));
+						this.set_state(VillageState.FIGHT_WITH_WIZARD);
+					}
+					
+				}
+				
+				if (this.wizard != null) {
+					if (this.wizard.z_offset > 0) {
+						this.wizard.z_offset -= 5 * CUTSCENE_SPEED_RATIO;
+						this.wizard_last_fall = this.state_counter;
+						if (this.wizard.z_offset < 0) this.wizard.z_offset = 0;
+					}
+				}
 				break;
 			case VillageState.FIGHT_WITH_WIZARD:
 				break;
@@ -310,7 +368,9 @@ class VillagersScene : AbstractScene {
 			dist = (monsterx - spear.x) ** 2 + (monstery - spear.y) ** 2;
 			if (dist < monster_radius) {
 				spear.is_dead = true;
-				this.monster.take_damage(0.01 * SPEAR_POWER_RATIO);
+				if (!this.monster.invincible) {
+					this.monster.take_damage(0.01 * SPEAR_POWER_RATIO);
+				}
 			}
 		}
 		
