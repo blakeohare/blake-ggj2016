@@ -5,6 +5,8 @@ SCREEN_HEIGHT = 600;
 PI = 3.14159265358979;
 TWO_PI = 2 * PI;
 
+ENABLE_BOTH = true;
+
 import 'enums.cry';
 import 'util.cry';
 import 'Event.cry';

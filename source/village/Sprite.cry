@@ -38,7 +38,7 @@ class Sprite {
 		this.x = x;
 		this.y = y;
 		this.theta = PI / 2;
-		this.radius = this.is_monster ? .12 : .03;
+		this.radius = this.is_monster ? .06 : .015;
 		this.window_bounds = null;
 		this.dx = 0;
 		this.dy = 0;
@@ -60,12 +60,18 @@ class Sprite {
 		this.on_fire_counter = -1;
 		this.is_dead = false;
 		this.is_attacking = false;
+		
+		this.render_y_offset = 0.0;
+		if (this.is_fire) {
+			this.render_y_offset = -0.13;
+		}
 	}
 	
 	function update() {
 	
 		if (this.is_fire) {
 			this.life_percent -= .06;
+			if (this.render_y_offset < 0) this.render_y_offset += 0.01;
 		}
 	
 		if (this.life_percent < 0) {
@@ -93,12 +99,12 @@ class Sprite {
 		if (this.is_projectile) {
 			if (this.is_fire) {
 				color = this.fire_colors[$floor(this.fire_colors.length * $random())];
-				this.draw_ellipse(this.x, this.y, this.radius, this.radius, color);
+				this.draw_ellipse(this.x, this.y + this.render_y_offset, this.radius, this.radius, color);
 			} else { // spear
 				
 			}
 		} else {
-			this.draw_ellipse(this.x, this.y, this.radius, this.radius, this.color);
+			this.draw_ellipse(this.x, this.y - this.radius * 2, this.radius * 2, this.radius * 2, this.color);
 			if (this.is_monster) {
 				//this.draw_ellipse(this.x, this.y - this.radius, this.radius / 2, this.radius / 2, this.color);
 				
@@ -108,7 +114,7 @@ class Sprite {
 				img = this.faces[this.is_attacking ? 'attacking' : 'normal'].get(direction, null);
 				if (img != null) {
 					x = coord[0];
-					y = coord[1] - img.height / 2;
+					y = coord[1] - $floor(this.window_bounds[3] * this.radius) - img.height;
 					switch (direction) {
 						case 's':
 							x -= img.width / 2;

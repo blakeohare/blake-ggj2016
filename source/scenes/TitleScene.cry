@@ -1,21 +1,32 @@
 class TitleScene : AbstractScene {
 
 	constructor() : base() {
-		this.buttons = [
-			['Play', 100, 100, this.play_click],
-			['Gamepad Config', 100, 200, this.gamepad_config_click],
-		];
+		this.buttons = [];
+		this.buttons.add(['Island of the Fire Monster', 100, 100, this.play_click]);
+		this.buttons.add(['Barry the Wizard', 100, 200, this.barry_click]);
+		if (ENABLE_BOTH) {
+			this.buttons.add(['Both', 100, 300, this.both_click]);
+		}
+		this.buttons.add(['Gamepad Config', 100, 400, this.gamepad_config_click]);
 		
 		this.current_index = 0;
 		this.anim_counter = 0;
 	}
 	
 	function play_click() {
-		this.switch_scene(new VillagersScene());
+		this.switch_scene(new VillagersScene(false));
 	}
 	
 	function gamepad_config_click() {
 		this.switch_scene(new GamepadConfigScene());
+	}
+	
+	function barry_click() {
+		this.switch_scene(new TraceScene(null, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT));
+	}
+	
+	function both_click() {
+		this.switch_scene(new VillagersScene(true));
 	}
 	
 	function update(events, mx, my) {

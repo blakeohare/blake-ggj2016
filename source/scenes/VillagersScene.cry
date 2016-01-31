@@ -1,5 +1,6 @@
 class VillagersScene : AbstractScene {
-	constructor() : base() {
+	constructor(enable_wizard) : base() {
+		this.is_both = enable_wizard;
 		this.monster = new Sprite('M', .5, .1);
 		
 		this.villagers = [];
@@ -83,7 +84,7 @@ class VillagersScene : AbstractScene {
 				monster = this.monster;
 				angle = 3.14159 * 2 / 8;
 				theta = monster.theta + angle * ($random() - .5);
-				fire = new Sprite('fire', monster.x, monster.y);
+				fire = new Sprite('fire', monster.x, monster.y - .00001);
 				dx = $cos(theta) * fire.v;
 				dy = -$sin(theta) * fire.v;
 				fire.locked_dxdy = [dx, dy];
@@ -105,9 +106,38 @@ class VillagersScene : AbstractScene {
 	
 	function render(rc) {
 		$gfx_blit_image(this.bg, 0, 0);
-		for (sprite : this.sprites) {
+		
+		sorted_sprites = this.quick_sort(this.sprites);
+		
+		for (sprite : sorted_sprites) {
 			sprite.window_bounds = this.bounds;
 			sprite.render(rc);
 		}
+	}
+	
+	function quick_sort(sprites) {
+		if (sprites.length < 3) {
+			if (sprites.length == 2) {
+				if (sprites[0].y > sprites[1].y) return sprites[::-1];
+			}
+			return sprites;
+		}
+		
+		pivot = sprites[0].y;
+		left = [];
+		right = [];
+		for (i = sprites.length - 1; i > 0; --i) {
+			sprite = sprites[i];
+			if (sprites[i].y < pivot) {
+				left.add(sprite);
+			} else {
+				right.add(sprite);
+			}
+		}
+		left = this.quick_sort(left);
+		right = this.quick_sort(right);
+		output = left + [sprites[0]];
+		output.concat(right);
+		return output;
 	}
 }
