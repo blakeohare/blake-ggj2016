@@ -98,23 +98,23 @@ class VillagersScene : AbstractScene {
 					++i;
 				}
 				
-				if (this.state_counter == FPS) {
+				if (this.state_counter == 3 * FPS / CUTSCENE_SPEED_RATIO) {
 					this.overlay = [
 						'Here we have the people of the _____ tribe,',
 						'performing their ritual dance to appease Molikaw',
 						'Niwatanthatu\'a, the lord of the volcano.'];
-				} else if (this.state_counter == FPS * 10) {
+				} else if (this.state_counter == FPS * 10 / CUTSCENE_SPEED_RATIO) {
 					this.overlay = [
 						'They perform this dance whenever Molikaw',
 						'Niwatanthatu\'a gets angry, which occurs every',
 						'Tuesday.'
 						];
-				} else if (this.state_counter == FPS * 15) {
+				} else if (this.state_counter == FPS * 15 / CUTSCENE_SPEED_RATIO) {
 					this.overlay = [
 						'Which is coincidentally when the cruise ships',
 						'generally arrive.',
 					];
-				} else if (this.state_counter == FPS * 20) {
+				} else if (this.state_counter == FPS * 20 / CUTSCENE_SPEED_RATIO) {
 					this.overlay = null;
 					this.set_state(VillageState.TRIP_FALL);
 				}
@@ -128,7 +128,7 @@ class VillagersScene : AbstractScene {
 						'Molikaw Niwatanthatu\'a and so he emerges from',
 						'his cave in the foulest of moods.'
 					];
-				} else if (this.state_counter == FPS * 6) {
+				} else if (this.state_counter == FPS * 6 / CUTSCENE_SPEED_RATIO) {
 					this.overlay = null;
 					this.set_state(VillageState.SCREEN_SHAKE);
 				}
@@ -178,13 +178,16 @@ class VillagersScene : AbstractScene {
 						'the A button and drive the volcano lord back to',
 						'his cave.'
 						];
-				} else if (this.state_counter == FPS * 6) {
+				} else if (this.state_counter == FPS * 6 / CUTSCENE_SPEED_RATIO) {
 					this.overlay = null;
 					this.set_state(VillageState.FIGHT_NO_WIZARD);
 				}
 				break;
 			case VillageState.FIGHT_NO_WIZARD:
-				
+				if (this.monster.life_percent < .001) {
+					this.set_state(VillageState.VILLAGER_WIN);
+					this.monster.target_coord = [.5, .595];
+				}
 				break;
 			case VillageState.FIGHT_PRE_WIZARD:
 				break;
@@ -195,6 +198,22 @@ class VillagersScene : AbstractScene {
 				break;
 			case VillageState.VILLAGER_WIN:
 				allow_input = false;
+				if (this.monster.target_coord == null) {
+					this.show_bg_overlay = true;
+					if (this.monster.y < .3) {
+						if (this.state_counter > FPS * 10 / CUTSCENE_SPEED_RATIO) {
+							this.switch_scene(new TitleScene());
+						}
+					} else {
+						this.monster.target_coord = [.5, .2];
+					}
+				}
+				
+				this.overlay = [
+					'The villagers have successfully deterred Molikaw',
+					'Niwatanthatu\'a, who now retreats into his cave',
+					'until the next Tuesday.'
+				];
 				break;
 			case VillageState.MONSTER_WIN:
 				break;
@@ -279,7 +298,7 @@ class VillagersScene : AbstractScene {
 			dist = (monsterx - spear.x) ** 2 + (monstery - spear.y) ** 2;
 			if (dist < monster_radius) {
 				spear.is_dead = true;
-				this.monster.take_damage(0.01);
+				this.monster.take_damage(0.01 * SPEAR_POWER_RATIO);
 			}
 		}
 		

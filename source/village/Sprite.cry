@@ -150,6 +150,10 @@ class Sprite {
 		if (this.life_percent < 0) {
 			this.life_percent = 0;
 			this.is_dead = true;
+			if (this.is_monster) {
+				this.is_dead = false;
+				this.life_percent = 0.00001;
+			}
 		}
 	}
 	
