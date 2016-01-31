@@ -14,6 +14,7 @@ import 'util.cry';
 import 'Event.cry';
 import 'GameContext.cry';
 import 'ImageLibrary.cry';
+import 'SoundManager.cry';
 import 'TextEngine.cry';
 
 import 'village/init.cry';
@@ -78,6 +79,8 @@ function main() {
 		}
 		
 		active_scene.render(rc++);
+		
+		SOUNDS.update();
 		
 		$game_clock_tick();
 	}

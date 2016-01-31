@@ -13,6 +13,9 @@ class VillagersScene : AbstractScene {
 			this.villagers.add(new Sprite('V' + i, .1 + i / (3.0 + VILLAGER_COUNT), .7));
 		}
 		
+		this.state = VillageState.INITIAL_DANCE;
+		this.state_counter = 0;
+		
 		this.sprites = this.villagers + [this.monster];
 		
 		this.sprites_by_id = {};
@@ -71,6 +74,46 @@ class VillagersScene : AbstractScene {
 	}
 	
 	function update(events, mx, my) {
+	
+		allow_input = true;
+		switch (this.state) {
+			case VillageState.INITIAL_DANCE:
+				allow_input = false;
+				if (this.state_counter == 10) {
+					SOUNDS.play_sound('sounds/test.ogg');
+				}
+				break;
+			case VillageState.TRIP_FALL:
+				allow_input = false;
+				break;
+			case VillageState.SCREEN_SHAKE:
+				allow_input = false;
+				break;
+			case VillageState.MONSTER_EMERGE:
+				allow_input = false;
+				break;
+			case VillageState.FIGHT:
+				break;
+			case VillageState.FIGHT_PRE_WIZARD:
+				break;
+			case VillageState.WIZARD_APPEARS:
+				allow_input = false;
+				break;
+			case VillageState.FIGHT_WITH_WIZARD:
+				break;
+			case VillageState.VILLAGER_WIN:
+				allow_input = false;
+				break;
+			case VillageState.MONSTER_WIN:
+				break;
+			case VillageState.WIZARD_WIN:
+				allow_input = false;
+				break;
+			default:
+				$assert(false, "Unknown state.");
+				break;
+		}
+	
 		for (event : events) {
 			if (event.is_gamepad && event.name == 'attack') {
 				player_id = CONTEXT.config_id_to_game_id.get(event.device.id, null);
@@ -168,6 +211,7 @@ class VillagersScene : AbstractScene {
 		}
 		
 		this.counter++;
+		this.state_counter++;
 	}
 	
 	function render_hud() {
@@ -178,7 +222,6 @@ class VillagersScene : AbstractScene {
 			x2 = SCREEN_WIDTH * (i + 1) / VILLAGER_COUNT;
 			this.render_meter(sprite, x, 25, x2 - x, 25);
 		}
-		
 		
 		LINE_WIDTH = 10;
 		LEFT = 10;

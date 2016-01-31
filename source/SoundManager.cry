@@ -1,0 +1,37 @@
+class SoundManager {
+	constructor() {
+		this.sounds = {};
+		this.queued_sounds = {};
+		this.queue = [];
+	}
+	
+	function play_sound(path) {
+		snd = this.sounds.get(path, null);
+		
+		if (snd == null) {
+			snd = $sfx_load_from_resource(path);
+			this.sounds[path] = snd;
+		}
+		$sfx_play(snd);
+	}
+	
+	function update() {
+	/*
+		if (this.queue.length > 0) {
+			new_queue = [];
+			for (q : this.queue) {
+				if ($sfx_is_sound_loaded(q)) {
+					snd = $sfx_get_sound(q);
+					this.sounds[q] = snd;
+					$sfx_play_sound(snd);
+				} else {
+					new_queue.add(q);
+				}
+			}
+			this.queue = new_queue;
+		}
+		//*/
+	}
+}
+
+SOUNDS = new SoundManager();
