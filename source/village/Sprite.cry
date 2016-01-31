@@ -37,7 +37,7 @@ class Sprite {
 		
 		this.x = x;
 		this.y = y;
-		this.facing = 3.14159 / 2;
+		this.theta = PI / 2;
 		this.radius = this.is_monster ? .12 : .03;
 		this.window_bounds = null;
 		this.dx = 0;
@@ -100,9 +100,43 @@ class Sprite {
 		} else {
 			this.draw_ellipse(this.x, this.y, this.radius, this.radius, this.color);
 			if (this.is_monster) {
-				this.draw_ellipse(this.x, this.y - this.radius, this.radius / 2, this.radius / 2, this.color);
+				//this.draw_ellipse(this.x, this.y - this.radius, this.radius / 2, this.radius / 2, this.color);
+				
+				direction = theta_to_direction(this.theta);
+				coord = this.convert_coord(this.x, this.y);
+				
+				img = this.faces[this.is_attacking ? 'attacking' : 'normal'].get(direction, null);
+				if (img != null) {
+					x = coord[0];
+					y = coord[1] - img.height / 2;
+					switch (direction) {
+						case 's':
+							x -= img.width / 2;
+							break;
+						case 'sw':
+							x -= 3 * img.width / 4;
+							break;
+						case 'w':
+							x -= 6 * img.width / 4;
+							break;
+						case 'se':
+							x -= img.width / 4;
+							break;
+						case 'e':
+							x += img.width * 43 / 100;
+							break;
+						default:
+							break;
+					}
+					$gfx_blit_image(img, x, y);
+				}
 			}
 		}
+	}
+	
+	function convert_coord(x, y) {
+		wb = this.window_bounds;
+		return [$floor(wb[2] * x + wb[0]), $floor(wb[3] * y + wb[1])];
 	}
 	
 	function draw_ellipse(x, y, w, h, color) {

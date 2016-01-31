@@ -1,0 +1,14 @@
+function theta_to_direction(theta) {
+	ratio = $floor(((theta / TWO_PI) % 1) * 16);
+	switch (ratio) {
+		case 15: case 0: return 'e';
+		case 1: case 2: return 'ne';
+		case 3: case 4: return 'n';
+		case 5: case 6: return 'nw';
+		case 7: case 8: return 'w';
+		case 9: case 10: return 'sw';
+		case 11: case 12: return 's';
+		case 13: case 14: return 'se';
+		default: return 's';
+	}
+}

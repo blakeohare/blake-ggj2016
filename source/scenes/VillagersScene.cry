@@ -28,6 +28,25 @@ class VillagersScene : AbstractScene {
 		
 		this.bg = IMAGES.get('island.png');
 		
+		this.monster.faces = {
+			'normal': {
+				's': IMAGES.get('monster/s.png'),
+				'se': IMAGES.get('monster/se.png'),
+				'sw': IMAGES.get('monster/sw.png'),
+				'e': IMAGES.get('monster/e.png'),
+				'w': IMAGES.get('monster/w.png'),
+			},
+			'attacking': {
+				's': IMAGES.get('monster/fire/s.png'),
+				'se': IMAGES.get('monster/fire/se.png'),
+				'sw': IMAGES.get('monster/fire/sw.png'),
+				'e': IMAGES.get('monster/fire/e.png'),
+				'w': IMAGES.get('monster/fire/w.png'),
+			},
+		};
+		
+		
+		
 		this.counter = 0;
 	}
 	
