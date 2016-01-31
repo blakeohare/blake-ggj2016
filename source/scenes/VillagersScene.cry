@@ -27,6 +27,8 @@ class VillagersScene : AbstractScene {
 		}
 		
 		this.bg = IMAGES.get('island.png');
+		
+		this.counter = 0;
 	}
 	
 	function update(events, mx, my) {
@@ -35,7 +37,11 @@ class VillagersScene : AbstractScene {
 				player_id = CONTEXT.config_id_to_game_id.get(event.device.id, null);
 				if (player_id != null) {
 					sprite = this.sprites_by_id.get(player_id, null);
-					$print(sprite.id + ' is attacking');
+					if (sprite.is_monster) {
+						sprite.is_attacking = event.value;
+					} else if (sprite.is_villager) {
+						
+					}
 				}
 			}
 		}
@@ -53,9 +59,29 @@ class VillagersScene : AbstractScene {
 			}
 		}
 		
+		if (!this.monster.is_dead && this.monster.is_attacking) {
+			if (this.counter % 3 == 0) {
+				monster = this.monster;
+				angle = 3.14159 * 2 / 8;
+				theta = monster.theta + angle * ($random() - .5);
+				fire = new Sprite('fire', monster.x, monster.y);
+				dx = $cos(theta) * fire.v;
+				dy = -$sin(theta) * fire.v;
+				fire.locked_dxdy = [dx, dy];
+				this.sprites.add(fire);
+			}
+		}
+		
+		new_sprites = [];
 		for (sprite : this.sprites) {
 			sprite.update();
+			if (!sprite.is_dead) {
+				new_sprites.add(sprite);
+			}
 		}
+		this.sprites = new_sprites;
+		
+		this.counter++;
 	}
 	
 	function render(rc) {

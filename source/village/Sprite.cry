@@ -2,9 +2,24 @@ class Sprite {
 	constructor(id, x, y) {
 		this.id = id;
 		this.is_monster = id == 'M';
-		this.is_villager = !this.is_monster;
+		this.is_spear = id == 'spear';
+		this.is_fire = id == 'fire';
+		this.is_projectile = this.is_fire || this.is_spear;
+		this.is_villager = !this.is_monster && !this.is_projectile;
+		
+		this.fire_colors = [
+			[255, 255, 0],
+			[255, 192, 0],
+			[255, 128, 0],
+			[255, 64, 0],
+		];
+		
 		this.color = {
+			'fire': [255, 0, 0],
+			'spear': [0, 0, 0],
+			
 			'M': [128, 80, 0],
+			
 			'V1': [0, 0, 255],
 			'V2': [255, 0, 0],
 			'V3': [0, 255, 255],
@@ -27,13 +42,42 @@ class Sprite {
 		this.window_bounds = null;
 		this.dx = 0;
 		this.dy = 0;
+		this.locked_dxdy = null;
+		
+		if (this.is_fire) {
+			this.radius = .018;
+		}
+		
 		this.v = .01;
 		if (this.is_monster) {
 			this.v = .003;
+		} else if (this.is_fire) {
+			this.v = .017;
 		}
+		
+		this.life_percent = 1.0;
+		
+		this.on_fire_counter = -1;
+		this.is_dead = false;
+		this.is_attacking = false;
 	}
 	
 	function update() {
+	
+		if (this.is_fire) {
+			this.life_percent -= .06;
+		}
+	
+		if (this.life_percent < 0) {
+			this.life_percent = 0;
+			this.is_dead = true;
+		}
+	
+		if (this.locked_dxdy != null) {
+			this.dx = this.locked_dxdy[0];
+			this.dy = this.locked_dxdy[1];
+		}
+		
 		if (this.dx != 0 || this.dy != 0) {
 			new_x = this.x + this.dx;
 			new_y = this.y + this.dy;
@@ -41,24 +85,32 @@ class Sprite {
 			this.x = new_x;
 			this.y = new_y;
 		}
+		
+		this.on_fire_counter--;
 	}
 	
 	function render(rc) {
-		this.draw_circle(this.x, this.y, this.radius, this.radius, this.color);
+		if (this.is_projectile) {
+			if (this.is_fire) {
+				color = this.fire_colors[$floor(this.fire_colors.length * $random())];
+				this.draw_ellipse(this.x, this.y, this.radius, this.radius, color);
+			} else { // spear
+				
+			}
+		} else {
+			this.draw_ellipse(this.x, this.y, this.radius, this.radius, this.color);
+			if (this.is_monster) {
+				this.draw_ellipse(this.x, this.y - this.radius, this.radius / 2, this.radius / 2, this.color);
+			}
+		}
 	}
 	
-	function draw_circle(x, y, w, h, color) {
+	function draw_ellipse(x, y, w, h, color) {
 		wb = this.window_bounds;
 		x = $floor(wb[2] * x + wb[0]);
 		y = $floor(wb[3] * y + wb[1]);
 		nw = $floor(wb[2] * w);
 		nh = $floor(nw * h / w);
 		$gfx_draw_ellipse(x - nw / 2, y - nh / 2, nw, nh, color[0], color[1], color[2], 255);
-		if (this.is_monster) {
-			nw = $floor(nw * .6);
-			nh = $floor(nh * .6);
-			y -= nh;
-			$gfx_draw_ellipse(x - nw / 2, y - nh / 2, nw, nh, color[0], color[1], color[2], 255);
-		}
 	}
 }
