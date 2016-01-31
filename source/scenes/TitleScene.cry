@@ -1,13 +1,19 @@
 class TitleScene : AbstractScene {
 
 	constructor() : base() {
+		x = 70;
+		y = 100;
 		this.buttons = [];
-		this.buttons.add(['Island of the Fire Monster', 100, 100, this.play_click]);
-		this.buttons.add(['Barry the Wizard', 100, 200, this.barry_click]);
+		this.buttons.add(['Wizards', x, y, this.barry_click]);
+		y += 100;
+		this.buttons.add(['Tropical Volcano Monsters', x, y, this.play_click]);
+		y += 100;
 		if (ENABLE_BOTH) {
-			this.buttons.add(['Both', 100, 300, this.both_click]);
+			this.buttons.add(['Wizards & Tropical Volcano Monsters', x, y, this.both_click]);
+		y += 100;
 		}
-		this.buttons.add(['Gamepad Config', 100, 400, this.gamepad_config_click]);
+		this.buttons.add(['Gamepad Config', x, y, this.gamepad_config_click]);
+		y += 100;
 		
 		this.current_index = 0;
 		this.anim_counter = 0;
