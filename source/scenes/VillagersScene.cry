@@ -92,9 +92,6 @@ class VillagersScene : AbstractScene {
 			case VillageState.INITIAL_DANCE:
 				this.show_bg_overlay = true;
 				allow_input = false;
-				if (this.state_counter == 10) {
-					SOUNDS.play_sound('sounds/test.ogg');
-				}
 				i = 0;
 				for (villager : this.villagers) {
 					villager.z_offset = $floor($abs($cos(this.counter * TWO_PI / (2 * FPS) + (i % 2 == 0 ? 0 : 1) * (PI / 4))) * 20);
@@ -102,22 +99,25 @@ class VillagersScene : AbstractScene {
 				}
 				
 				if (this.state_counter == 3 * FPS / CUTSCENE_SPEED_RATIO) {
+					SOUNDS.play_sound('sounds/here-we-have.ogg');
 					this.overlay = [
 						'Here we have the people of the g2d ellipse tribe,',
 						'performing their ritual dance to appease Molikaw',
 						'Niwatanthatu\'a, the Lord of the Volcano.'];
 				} else if (this.state_counter == FPS * 13 / CUTSCENE_SPEED_RATIO) {
+					SOUNDS.play_sound('sounds/tuesday-around-noon.ogg');
 					this.overlay = [
 						'They perform this dance whenever Molikaw',
-						'Niwatanthatu\'a gets angry, which occurs every',
-						'Tuesday.'
+						'Niwatanthatu\'a beomces angry, which occurs',
+						'every Tuesday around noon.'
 						];
 				} else if (this.state_counter == FPS * 20 / CUTSCENE_SPEED_RATIO) {
+					SOUNDS.play_sound('sounds/cruise-ships-arrive.ogg');
 					this.overlay = [
 						'...which is coincidentally when the cruise',
-						'ship generally arrive.',
+						'ships generally arrive.',
 					];
-				} else if (this.state_counter == FPS * 20 / CUTSCENE_SPEED_RATIO) {
+				} else if (this.state_counter == FPS * 25 / CUTSCENE_SPEED_RATIO) {
 					this.overlay = null;
 					this.set_state(VillageState.TRIP_FALL);
 				}
@@ -126,6 +126,7 @@ class VillagersScene : AbstractScene {
 			case VillageState.TRIP_FALL:
 				
 				if (this.state_counter == FPS) {
+					SOUNDS.play_sound('sounds/foulest-of-moods.ogg');
 					this.overlay = [
 						'One villager falls over. This has displeased',
 						'Molikaw Niwatanthatu\'a and so he emerges from',
@@ -166,19 +167,26 @@ class VillagersScene : AbstractScene {
 				
 				if (this.state_counter < 2) {
 					this.monster.target_coord = [.5, .595];
+					//$print("Setting coord!");
 				} else {
+					//$print(this.monster.x + ', ' + this.monster.y);
+					this.monster.dx = 0;
+					this.monster.dy = 0;
 					if (this.monster.target_coord == null) {
+						//$print("DONE");
 						this.set_state(VillageState.FIGHT_START);
 					}
 				}
 				break;
 			case VillageState.FIGHT_START:
+				//$print("Fight start");
 				this.show_bg_overlay = false;
 				allow_input = true;
 				if (this.state_counter == 1) {
+					SOUNDS.play_sound('sounds/a-button.ogg');
 					this.overlay = [
 						'Now the villagers must throw their spears with',
-						'the A button and drive the Volcano Lord back to',
+						'the A button to drive the Volcano Lord back to',
 						'his cave.'
 						];
 				} else if (this.state_counter == FPS * 6 / CUTSCENE_SPEED_RATIO) {
@@ -187,6 +195,8 @@ class VillagersScene : AbstractScene {
 				}
 				break;
 			case VillageState.FIGHT_NO_WIZARD:
+				//$print('fight no wizard');
+				allow_input = true;
 				if (!this.are_any_villagers_alive()) {
 					this.set_state(VillageState.MONSTER_WIN);
 				} else {
@@ -205,14 +215,16 @@ class VillagersScene : AbstractScene {
 			case VillageState.WIZARD_APPEARS:
 				if (this.state_counter == 2) {
 					this.monster.invincible = true;
+					SOUNDS.play_sound('sounds/no-longer-phased.ogg');
 					this.overlay = [
-						'Molikaw niwatanthatu\'a has become even more',
+						'Molikaw Niwatanthatu\'a has become even more',
 						'enraged and is no longer phased by the spears.'
 					];
 				} else if (this.state_counter == FPS * 5 / CUTSCENE_SPEED_RATIO) {
 					this.overlay = null;
 				} else if (this.state_counter == FPS * 10 / CUTSCENE_SPEED_RATIO) {
 					allow_input = false;
+					SOUNDS.play_sound('sounds/wizard-out-of-nowhere.ogg');
 					this.overlay = [
 						'Suddenly, out of nowhere a Wizard appears to',
 						'aid the villagers. '
@@ -226,12 +238,14 @@ class VillagersScene : AbstractScene {
 				} else if (this.wizard != null && this.wizard.z_offset == 0) {
 					effective_counter = this.state_counter - this.wizard_last_fall;
 					if (effective_counter == FPS / CUTSCENE_SPEED_RATIO) {
+						SOUNDS.play_sound('sounds/rally-around.ogg');
 						this.overlay = [
 							'Quickly, the villagers rally around the',
 							'wizard to protect him while he casts his',
 							'spells.'
 						];
 					} else if (effective_counter == FPS * 6 / CUTSCENE_SPEED_RATIO) {
+						SOUNDS.play_sound('sounds/entirely-up-to-the-wizard.ogg');
 						this.overlay = [
 							'It is entirely up to the wizard to finish',
 							'casting his spells to defeat Molikaw',
@@ -279,22 +293,29 @@ class VillagersScene : AbstractScene {
 				}
 				
 				if (this.state == VillageState.WIZARD_WIN) {
-					this.overlay = [
-						'The wizard\'s work is now complete. It is',
-						'now safe to him to return to his spaceship',
-					];
+					if (this.state_counter == 2) {
+						SOUNDS.play_sound('sounds/wizards-work-complete.ogg');
+						this.overlay = [
+							'The wizard\'s work is now complete. It is',
+							'now safe to him to return to his spaceship',
+						];
+					}
 					
 					this.wizard.z_offset += 5;
 				} else {
-					this.overlay = [
-						'The villagers have successfully deterred Molikaw',
-						'Niwatanthatu\'a, who now retreats into his cave',
-						'until the next Tuesday.'
-					];
+					if (this.state_counter == 2) {
+						SOUNDS.play_sound('sounds/villagers-successful.ogg');
+						this.overlay = [
+							'The villagers have successfully deterred Molikaw',
+							'Niwatanthatu\'a, who now retreats into his cave',
+							'until the next Tuesday.'
+						];
+					}
 				}
 				break;
 			case VillageState.MONSTER_WIN:
 				if (this.state_counter == FPS / CUTSCENE_SPEED_RATIO) {
+					SOUNDS.play_sound('sounds/sadness.ogg');
 					this.overlay = [
 						'Molikaw Niwatanthatu\'a, realizing his rage has',
 						'resulted in no longer having any friends to play',
@@ -326,6 +347,7 @@ class VillagersScene : AbstractScene {
 				}
 			}
 			
+			//$print('allowing input...');
 			for (device_id : this.device_ids_configured) {
 				dir = $gamepad_get_state(device_id, 'dir');
 				
