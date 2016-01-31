@@ -1,10 +1,12 @@
 
 ARENA_BOUNDS = [51.0 / SCREEN_WIDTH, 333.0 / SCREEN_HEIGHT, 925.0 / SCREEN_WIDTH, 525.0 / SCREEN_HEIGHT];
 
+MONSTER_START = [.5, 234.0 / SCREEN_HEIGHT];
+
 class VillagersScene : AbstractScene {
 	constructor(enable_wizard) : base() {
 		this.is_both = enable_wizard;
-		this.monster = new Sprite('M', .5, .1);
+		this.monster = new Sprite('M', MONSTER_START[0], MONSTER_START[1]);
 		
 		this.villagers = [];
 		for (i = 1; i <= 7; ++i) {
@@ -112,13 +114,32 @@ class VillagersScene : AbstractScene {
 		}
 		
 		new_sprites = [];
+		spears = [];
+		fires = [];
+		
 		for (sprite : this.sprites) {
 			sprite.update();
 			if (!sprite.is_dead) {
 				new_sprites.add(sprite);
+				
+				if (sprite.is_spear) {
+					spears.add(sprite);
+				} else if (sprite.is_fire) {
+					fires.add(sprite);
+				}
 			}
 		}
 		this.sprites = new_sprites;
+		monsterx = this.monster.x;
+		monstery = this.monster.y;
+		monster_radius = this.monster.radius ** 2;
+		for (spear : spears) {
+			dist = (monsterx - spear.x) ** 2 + (monstery - spear.y) ** 2;
+			if (dist < monster_radius) {
+				spear.is_dead = true;
+				this.monster.take_damage(0.01);
+			}
+		}
 		
 		this.counter++;
 	}

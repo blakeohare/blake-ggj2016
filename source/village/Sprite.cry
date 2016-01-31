@@ -70,6 +70,7 @@ class Sprite {
 		}
 		
 		this.spear_cooldown = -1;
+		this.damage_counter = -1;
 	}
 	
 	function update() {
@@ -81,6 +82,8 @@ class Sprite {
 			this.spear_cooldown--;
 		} else if (this.is_spear) {
 			this.life_percent -= .05;
+		} else if (this.is_monster) {
+			this.damage_counter--;
 		}
 	
 		if (this.life_percent < 0) {
@@ -110,6 +113,15 @@ class Sprite {
 		this.on_fire_counter--;
 	}
 	
+	function take_damage(amount) {
+		this.damage_counter = 3;
+		this.life_percent -= amount;
+		if (this.life_percent < 0) {
+			this.life_percent = 0;
+			this.is_dead = true;
+		}
+	}
+	
 	function render(rc) {
 		if (this.is_projectile) {
 			if (this.is_fire) {
@@ -123,7 +135,19 @@ class Sprite {
 				$gfx_draw_line(other_coord[0], other_coord[1], coord[0], coord[1], 2, 0, 0, 0, 255);
 			}
 		} else {
-			this.draw_ellipse(this.x, this.y - this.radius * 2, this.radius * 2, this.radius * 2, this.color);
+			color = this.color;
+			if (this.is_monster) {
+				if (this.damage_counter >= 0) {
+					r = 255 - this.color[0];
+					g = 255 - this.color[1];
+					b = 255 - this.color[2];
+					r = r * (3 - this.damage_counter) / 3;
+					g = g * (3 - this.damage_counter) / 3;
+					b = b * (3 - this.damage_counter) / 3;
+					color = [255 - r, 255 - g, 255 - b];
+				}
+			}
+			this.draw_ellipse(this.x, this.y - this.radius * 2, this.radius * 2, this.radius * 2, color);
 			if (this.is_monster) {
 				//this.draw_ellipse(this.x, this.y - this.radius, this.radius / 2, this.radius / 2, this.color);
 				
