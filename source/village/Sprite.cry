@@ -96,6 +96,12 @@ class Sprite {
 		if (this.dx != 0 || this.dy != 0) {
 			new_x = this.x + this.dx;
 			new_y = this.y + this.dy;
+			if (this.is_villager) {
+				if (new_x < ARENA_BOUNDS[0]) new_x = ARENA_BOUNDS[0];
+				else if (new_x > ARENA_BOUNDS[2]) new_x = ARENA_BOUNDS[2];
+				if (new_y < ARENA_BOUNDS[1]) new_y = ARENA_BOUNDS[1];
+				else if (new_y > ARENA_BOUNDS[3]) new_y = ARENA_BOUNDS[3];
+			}
 			this.theta = $arctan2(-this.dy, this.dx);
 			this.x = new_x;
 			this.y = new_y;
