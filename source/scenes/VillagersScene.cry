@@ -172,10 +172,10 @@ class VillagersScene : AbstractScene {
 	
 	function render_hud() {
 		this.render_meter(this.monster, 0, 0, SCREEN_WIDTH, 25);
-		for (i = 0; i < 7; ++i) {
+		for (i = 0; i < VILLAGER_COUNT; ++i) {
 			sprite = this.sprites_by_id['V' + (i + 1)];
-			x = SCREEN_WIDTH * i / 7;
-			x2 = SCREEN_WIDTH * (i + 1) / 7;
+			x = SCREEN_WIDTH * i / VILLAGER_COUNT;
+			x2 = SCREEN_WIDTH * (i + 1) / VILLAGER_COUNT;
 			this.render_meter(sprite, x, 25, x2 - x, 25);
 		}
 	}
@@ -187,6 +187,12 @@ class VillagersScene : AbstractScene {
 		else if (life < 0) life = 0;
 		meter_width = $floor(life * (width - 2));
 		color = sprite.color;
+		r = color[0];
+		g = color[1];
+		b = color[2];
+		if (r == 0 && g == 0 && b == 0) {
+			color = [50, 50, 50];
+		}
 		$gfx_draw_rectangle(x + 1, y + 1, meter_width, height - 2, color[0], color[1], color[2], 255);
 		color = sprite.dark_color;
 		bottom = y + height - 2;
