@@ -116,16 +116,21 @@ class VillagersScene : AbstractScene {
 		new_sprites = [];
 		spears = [];
 		fires = [];
+		villagers = [];
 		
 		for (sprite : this.sprites) {
-			sprite.update();
 			if (!sprite.is_dead) {
-				new_sprites.add(sprite);
-				
-				if (sprite.is_spear) {
-					spears.add(sprite);
-				} else if (sprite.is_fire) {
-					fires.add(sprite);
+				sprite.update();
+				if (!sprite.is_dead) {
+					new_sprites.add(sprite);
+					
+					if (sprite.is_spear) {
+						spears.add(sprite);
+					} else if (sprite.is_fire) {
+						fires.add(sprite);
+					} else if (sprite.is_villager) {
+						villagers.add(sprite);
+					}
 				}
 			}
 		}
@@ -138,6 +143,27 @@ class VillagersScene : AbstractScene {
 			if (dist < monster_radius) {
 				spear.is_dead = true;
 				this.monster.take_damage(0.01);
+			}
+		}
+		
+		
+		vr = VILLAGER_RADIUS * 2;
+		vr_squared = vr ** 2;
+		for (fire : fires) {
+			fire_x = fire.x;
+			for (villager : this.villagers) {
+				if (!villager.is_dead) {
+					dx = $abs(villager.x - fire_x);
+					if (dx < vr) {
+						dist = (villager.y - fire.y) ** 2 + dx ** 2;
+						if (dist < vr_squared) {
+							fire.is_dead = true;
+							if (villager.on_fire_counter < 0) {
+								villager.on_fire_counter = FPS / 2;
+							}
+						}
+					}
+				}
 			}
 		}
 		

@@ -1,3 +1,6 @@
+VILLAGER_RADIUS = .015;
+
+
 class Sprite {
 	constructor(id, x, y) {
 		this.id = id;
@@ -38,7 +41,7 @@ class Sprite {
 		this.x = x;
 		this.y = y;
 		this.theta = PI / 2;
-		this.radius = this.is_monster ? .06 : .015;
+		this.radius = this.is_monster ? .06 : VILLAGER_RADIUS;
 		this.window_bounds = null;
 		this.dx = 0;
 		this.dy = 0;
@@ -80,6 +83,10 @@ class Sprite {
 			if (this.render_y_offset < 0) this.render_y_offset += 0.01;
 		} else if (this.is_villager) {
 			this.spear_cooldown--;
+			if (this.on_fire_counter >= 0) {
+				this.take_damage(.01);
+				this.on_fire_counter--;
+			}
 		} else if (this.is_spear) {
 			this.life_percent -= .05;
 		} else if (this.is_monster) {
@@ -110,7 +117,6 @@ class Sprite {
 			this.y = new_y;
 		}
 		
-		this.on_fire_counter--;
 	}
 	
 	function take_damage(amount) {
