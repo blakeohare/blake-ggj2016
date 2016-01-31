@@ -5,7 +5,7 @@ SCREEN_HEIGHT = 600;
 PI = 3.14159265358979;
 TWO_PI = 2 * PI;
 
-ENABLE_BOTH = true;
+ENABLE_BOTH = false;
 
 import 'enums.cry';
 import 'util.cry';
@@ -24,7 +24,7 @@ import 'scenes/init.cry';
 function main() {
 	$game_initialize(FPS);
 	$game_initialize_screen(SCREEN_WIDTH, SCREEN_HEIGHT);
-	$game_set_title("You're a Wizard, Barry!");
+	$game_set_title("Wizards & Tropical Volcano Monsters");
 	
 	// Device ID's don't really matter. They're opaque strings that are allocated to player ID's and there's a lookup table in GameContext.
 	$gamepad_enable_recent(['G1', 'G2', 'G3', 'G4', 'G5', 'G6', 'G7', 'G8', 'G9', 'G10', 'G11', 'G12', 'G13']);

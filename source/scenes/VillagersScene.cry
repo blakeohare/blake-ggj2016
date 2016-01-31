@@ -46,9 +46,23 @@ class VillagersScene : AbstractScene {
 			},
 		};
 		
-		
-		
 		this.counter = 0;
+	}
+	
+	function throw_spear(sprite) {
+		sprite.spear_cooldown = 5;
+		theta = sprite.theta;
+		spear = new Sprite('spear', sprite.x, sprite.y - sprite.radius * 2);
+		dx = $cos(theta) * spear.v;
+		dy = -$sin(theta) * spear.v;
+		spear.locked_dxdy = [dx, dy];
+		
+		for (i = 0; i < 3; ++i) {
+			// hack. move the spear a bit before adding it to the scene.
+			spear.update();
+		}
+		this.sprites.add(spear);
+		
 	}
 	
 	function update(events, mx, my) {
@@ -60,7 +74,9 @@ class VillagersScene : AbstractScene {
 					if (sprite.is_monster) {
 						sprite.is_attacking = event.value;
 					} else if (sprite.is_villager) {
-						
+						if (event.value && sprite.spear_cooldown < 0) {
+							this.throw_spear(sprite);
+						}
 					}
 				}
 			}

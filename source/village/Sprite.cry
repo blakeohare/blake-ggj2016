@@ -48,11 +48,14 @@ class Sprite {
 			this.radius = .018;
 		}
 		
-		this.v = .01;
+		this.v = .008;
+		
 		if (this.is_monster) {
 			this.v = .003;
 		} else if (this.is_fire) {
 			this.v = .017;
+		} else if (this.is_spear) {
+			this.v = .02;
 		}
 		
 		this.life_percent = 1.0;
@@ -65,6 +68,8 @@ class Sprite {
 		if (this.is_fire) {
 			this.render_y_offset = -0.13;
 		}
+		
+		this.spear_cooldown = -1;
 	}
 	
 	function update() {
@@ -72,6 +77,10 @@ class Sprite {
 		if (this.is_fire) {
 			this.life_percent -= .06;
 			if (this.render_y_offset < 0) this.render_y_offset += 0.01;
+		} else if (this.is_villager) {
+			this.spear_cooldown--;
+		} else if (this.is_spear) {
+			this.life_percent -= .05;
 		}
 	
 		if (this.life_percent < 0) {
@@ -101,7 +110,11 @@ class Sprite {
 				color = this.fire_colors[$floor(this.fire_colors.length * $random())];
 				this.draw_ellipse(this.x, this.y + this.render_y_offset, this.radius, this.radius, color);
 			} else { // spear
-				
+				coord = this.convert_coord(this.x, this.y);
+				ax = -$cos(this.theta) * .03 + this.x;
+				ay = $sin(this.theta) * .03 + this.y;
+				other_coord = this.convert_coord(ax, ay);
+				$gfx_draw_line(other_coord[0], other_coord[1], coord[0], coord[1], 2, 0, 0, 0, 255);
 			}
 		} else {
 			this.draw_ellipse(this.x, this.y - this.radius * 2, this.radius * 2, this.radius * 2, this.color);
