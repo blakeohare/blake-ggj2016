@@ -103,19 +103,19 @@ class VillagersScene : AbstractScene {
 				
 				if (this.state_counter == 3 * FPS / CUTSCENE_SPEED_RATIO) {
 					this.overlay = [
-						'Here we have the people of the _____ tribe,',
+						'Here we have the people of the g2d ellipse tribe,',
 						'performing their ritual dance to appease Molikaw',
-						'Niwatanthatu\'a, the lord of the volcano.'];
-				} else if (this.state_counter == FPS * 10 / CUTSCENE_SPEED_RATIO) {
+						'Niwatanthatu\'a, the Lord of the Volcano.'];
+				} else if (this.state_counter == FPS * 13 / CUTSCENE_SPEED_RATIO) {
 					this.overlay = [
 						'They perform this dance whenever Molikaw',
 						'Niwatanthatu\'a gets angry, which occurs every',
 						'Tuesday.'
 						];
-				} else if (this.state_counter == FPS * 15 / CUTSCENE_SPEED_RATIO) {
+				} else if (this.state_counter == FPS * 20 / CUTSCENE_SPEED_RATIO) {
 					this.overlay = [
-						'Which is coincidentally when the cruise ships',
-						'generally arrive.',
+						'...which is coincidentally when the cruise',
+						'ship generally arrive.',
 					];
 				} else if (this.state_counter == FPS * 20 / CUTSCENE_SPEED_RATIO) {
 					this.overlay = null;
@@ -131,7 +131,7 @@ class VillagersScene : AbstractScene {
 						'Molikaw Niwatanthatu\'a and so he emerges from',
 						'his cave in the foulest of moods.'
 					];
-				} else if (this.state_counter == FPS * 6 / CUTSCENE_SPEED_RATIO) {
+				} else if (this.state_counter == FPS * 9 / CUTSCENE_SPEED_RATIO) {
 					this.overlay = null;
 					this.set_state(VillageState.SCREEN_SHAKE);
 				}
@@ -178,7 +178,7 @@ class VillagersScene : AbstractScene {
 				if (this.state_counter == 1) {
 					this.overlay = [
 						'Now the villagers must throw their spears with',
-						'the A button and drive the volcano lord back to',
+						'the A button and drive the Volcano Lord back to',
 						'his cave.'
 						];
 				} else if (this.state_counter == FPS * 6 / CUTSCENE_SPEED_RATIO) {
