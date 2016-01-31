@@ -25,6 +25,8 @@ class VillagersScene : AbstractScene {
 				this.device_ids_configured.add(device_id);
 			}
 		}
+		
+		this.bg = IMAGES.get('island.png');
 	}
 	
 	function update(events, mx, my) {
@@ -33,7 +35,7 @@ class VillagersScene : AbstractScene {
 				player_id = CONTEXT.config_id_to_game_id.get(event.device.id, null);
 				if (player_id != null) {
 					sprite = this.sprites_by_id.get(player_id, null);
-					
+					$print(sprite.id + ' is attacking');
 				}
 			}
 		}
@@ -43,7 +45,6 @@ class VillagersScene : AbstractScene {
 			
 			player_id = CONTEXT.config_id_to_game_id.get(device_id, null);
 			if (player_id != null) {
-				$print(player_id);
 				sprite = this.sprites_by_id.get(player_id, null);
 				if (sprite != null) {
 					sprite.dx = dir[0] * sprite.v;
@@ -58,7 +59,7 @@ class VillagersScene : AbstractScene {
 	}
 	
 	function render(rc) {
-		$gfx_fill_screen(255, 255, 255);
+		$gfx_blit_image(this.bg, 0, 0);
 		for (sprite : this.sprites) {
 			sprite.window_bounds = this.bounds;
 			sprite.render(rc);

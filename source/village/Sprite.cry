@@ -7,7 +7,7 @@ class Sprite {
 			'M': [128, 80, 0],
 			'V1': [0, 0, 255],
 			'V2': [255, 0, 0],
-			'V3': [0, 128, 0],
+			'V3': [0, 255, 255],
 			'V4': [255 ,255, 0],
 			'V5': [255, 128, 0],
 			'V6': [128, 0, 128],
@@ -27,9 +27,9 @@ class Sprite {
 		this.window_bounds = null;
 		this.dx = 0;
 		this.dy = 0;
-		this.v = .02;
+		this.v = .01;
 		if (this.is_monster) {
-			this.v = .007;
+			this.v = .003;
 		}
 	}
 	
@@ -51,8 +51,14 @@ class Sprite {
 		wb = this.window_bounds;
 		x = $floor(wb[2] * x + wb[0]);
 		y = $floor(wb[3] * y + wb[1]);
-		w = $floor(wb[2] * w);
-		h = $floor(wb[3] * h);
-		$gfx_draw_ellipse(x - w / 2, y - h / 2, w, h, color[0], color[1], color[2], 255);
+		nw = $floor(wb[2] * w);
+		nh = $floor(nw * h / w);
+		$gfx_draw_ellipse(x - nw / 2, y - nh / 2, nw, nh, color[0], color[1], color[2], 255);
+		if (this.is_monster) {
+			nw = $floor(nw * .6);
+			nh = $floor(nh * .6);
+			y -= nh;
+			$gfx_draw_ellipse(x - nw / 2, y - nh / 2, nw, nh, color[0], color[1], color[2], 255);
+		}
 	}
 }
