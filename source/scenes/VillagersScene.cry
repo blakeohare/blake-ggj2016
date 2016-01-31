@@ -9,8 +9,8 @@ class VillagersScene : AbstractScene {
 		this.monster = new Sprite('M', MONSTER_START[0], MONSTER_START[1]);
 		
 		this.villagers = [];
-		for (i = 1; i <= 7; ++i) {
-			this.villagers.add(new Sprite('V' + i, .1 + i / 10.0, .7));
+		for (i = 1; i <= VILLAGER_COUNT; ++i) {
+			this.villagers.add(new Sprite('V' + i, .1 + i / (3.0 + VILLAGER_COUNT), .7));
 		}
 		
 		this.sprites = this.villagers + [this.monster];

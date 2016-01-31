@@ -9,7 +9,10 @@ class GameContext {
 		this.config_id_to_game_id = {};
 		this.game_id_to_config_id = {};
 		gamepads = $gamepad_count();
-		ids = ['M', 'V1', 'V2', 'V3', 'V4', 'V5', 'V6', 'V7'];
+		ids = ['M'];
+		for (i = 1; i <= VILLAGER_COUNT; ++i) {
+			ids.add('V' + i);
+		}
 		for (i = 0; i < gamepads; ++i) {
 			device = $gamepad_get_device(i);
 			device_id = device.id;

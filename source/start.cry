@@ -7,6 +7,8 @@ TWO_PI = 2 * PI;
 
 ENABLE_BOTH = false;
 
+VILLAGER_COUNT = 12;
+
 import 'enums.cry';
 import 'util.cry';
 import 'Event.cry';
@@ -27,7 +29,11 @@ function main() {
 	$game_set_title("Wizards & Tropical Volcano Monsters");
 	
 	// Device ID's don't really matter. They're opaque strings that are allocated to player ID's and there's a lookup table in GameContext.
-	$gamepad_enable_recent(['G1', 'G2', 'G3', 'G4', 'G5', 'G6', 'G7', 'G8', 'G9', 'G10', 'G11', 'G12', 'G13']);
+	ids = [];
+	for (i = 1; i <= (VILLAGER_COUNT + 3); ++i) {
+		ids.add('G' + i);
+	}
+	$gamepad_enable_recent(ids);
 	
 	CONTEXT.refresh_player_ids();
 	

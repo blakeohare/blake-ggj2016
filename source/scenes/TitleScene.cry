@@ -6,7 +6,7 @@ class TitleScene : AbstractScene {
 		this.buttons = [];
 		this.buttons.add(['Wizards', x, y, this.barry_click, 'this requires a mouse or touchscreen']);
 		y += 100;
-		this.buttons.add(['Tropical Volcano Monsters', x, y, this.play_click, 'this requires 2-12 gamepads']);
+		this.buttons.add(['Tropical Volcano Monsters', x, y, this.play_click, 'this requires 2-' + (VILLAGER_COUNT + 1) + ' gamepads']);
 		y += 100;
 		if (ENABLE_BOTH) {
 			this.buttons.add(['Wizards & Tropical Volcano Monsters', x, y, this.both_click, 'this requires all of the above']);
