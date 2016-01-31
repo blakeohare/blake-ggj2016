@@ -119,6 +119,12 @@ class TraceScene : AbstractScene {
 	
 		if (this.village_mode) {
 			this.bg.update(events, mx, my);
+			if (this.bg.wizard.is_dead) {
+				this.switch_scene(this.bg);
+				this.bg.set_state(VillageState.FIGHT_NO_WIZARD);
+				this.bg.enable_wizard = false;
+				this.bg.is_both = false;
+			}
 		}
 	
 		switch (this.game_mode) {
