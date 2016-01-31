@@ -178,6 +178,29 @@ class VillagersScene : AbstractScene {
 			x2 = SCREEN_WIDTH * (i + 1) / VILLAGER_COUNT;
 			this.render_meter(sprite, x, 25, x2 - x, 25);
 		}
+		
+		
+		LINE_WIDTH = 10;
+		LEFT = 10;
+		WIDTH = 60;
+		HEIGHT = 100;
+		BOTTOM = SCREEN_HEIGHT - 10;
+		
+		TOP = BOTTOM - HEIGHT;
+		RIGHT = LEFT + WIDTH;
+		
+		r = 255;
+		g = 128;
+		b = 0;
+		
+		$gfx_draw_rectangle(LEFT, TOP, LINE_WIDTH, HEIGHT, r, g, b, 255);
+		$gfx_draw_rectangle(RIGHT - LINE_WIDTH, TOP, LINE_WIDTH, HEIGHT, r, g, b, 255);
+		$gfx_draw_rectangle(LEFT, TOP, WIDTH, LINE_WIDTH, r, g, b, 255);
+		$gfx_draw_rectangle(LEFT, BOTTOM - LINE_WIDTH, WIDTH, LINE_WIDTH, r, g, b, 255);
+		
+		x = RIGHT + 10;
+		coords = TEXT.render('white-L', 'Rational', x, TOP + 2);
+		TEXT.render('white-L', 'Geometric', x, coords[1]);
 	}
 	
 	function render_meter(sprite, x, y, width, height) {
