@@ -190,6 +190,20 @@ class Sprite {
 					}
 					$gfx_blit_image(img, x, y);
 				}
+			} else if (this.is_villager && this.on_fire_counter > 0) {
+				ax = this.x - VILLAGER_RADIUS * .8;
+				cx = this.x + VILLAGER_RADIUS * .8;
+				ay = this.y - VILLAGER_RADIUS * 3.2;
+				cy = ay;
+				bx = this.x;
+				by = this.y - VILLAGER_RADIUS * 3.7;
+				
+				fr = VILLAGER_RADIUS / 1.5;
+				for (xy : [[ax, ay], [bx, by], [cx, cy]]) {
+					x = xy[0];
+					y = xy[1];
+					this.draw_ellipse(x, y, fr, fr,  this.fire_colors[$floor(this.fire_colors.length * $random())]);
+				}
 			}
 		}
 	}
