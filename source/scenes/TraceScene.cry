@@ -157,9 +157,26 @@ class TraceScene : AbstractScene {
 				break;
 			case TraceGameMode.FINISHED:
 				this.finished_counter++;
-				if (this.finished_counter > 100) {
+				if (this.finished_counter > FPS) {
 					this.current_index = -1;
 					this.game_mode = TraceGameMode.NOT_STARTED;
+					
+					if (this.village_mode) {
+						this.bg.monster.take_damage(.5 / 3 + .05);
+					}
+					
+					CONTEXT.trace_level += 1;
+					if (CONTEXT.trace_level >= 4) {
+						CONTEXT.trace_level = 1;
+						if (this.village_mode) {
+							this.switch_scene(this.bg);
+							this.bg.set_state(VillageState.WIZARD_WIN);
+						} else {
+							this.switch_scene(new TitleScene());
+						}
+					} else {
+						this.switch_scene(new TraceScene(this.bg, this.left, this.top, this.width, this.height));
+					}
 				}
 				break;
 			default:
@@ -251,7 +268,7 @@ class TraceScene : AbstractScene {
 					b = 255;
 					break;
 				case TraceGameMode.FAILURE:
-					value = i - this.failure_counter;
+					value = i - this.failure_counter * 2;
 					r = 255 - $floor(255 * value / 15);
 					if (r > 255) r = 255;
 					else if (r < 0) r = 0;

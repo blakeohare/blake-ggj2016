@@ -1,0 +1,13 @@
+class AsteroidsScene : AbstractScene {
+	constructor() : base() {
+	
+	}
+	
+	function update(events, mx, my) {
+	
+	}
+	
+	function render(rc) {
+	
+	}
+}

@@ -1,3 +1,4 @@
+import 'scenes/AsteroidsScene.cry';
 import 'scenes/GamepadBindScene.cry';
 import 'scenes/GamepadConfigScene.cry';
 import 'scenes/LoadingScene.cry';

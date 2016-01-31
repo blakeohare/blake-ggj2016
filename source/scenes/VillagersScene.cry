@@ -258,23 +258,40 @@ class VillagersScene : AbstractScene {
 			case VillageState.FIGHT_WITH_WIZARD:
 				break;
 			case VillageState.VILLAGER_WIN:
+			case VillageState.WIZARD_WIN:
+				
 				allow_input = false;
 				if (this.monster.target_coord == null) {
 					this.show_bg_overlay = true;
 					if (this.monster.y < .3) {
 						if (this.state_counter > FPS * 10 / CUTSCENE_SPEED_RATIO) {
-							this.switch_scene(new TitleScene());
+							if (this.state == VillageState.WIZARD_WIN) {
+								if (this.wizard.z_offset > SCREEN_HEIGHT) {
+									this.switch_scene(new AsteroidsScene());
+								}
+							} else {
+								this.switch_scene(new TitleScene());
+							}
 						}
 					} else {
 						this.monster.target_coord = [.5, .2];
 					}
 				}
 				
-				this.overlay = [
-					'The villagers have successfully deterred Molikaw',
-					'Niwatanthatu\'a, who now retreats into his cave',
-					'until the next Tuesday.'
-				];
+				if (this.state == VillageState.WIZARD_WIN) {
+					this.overlay = [
+						'The wizard\'s work is now complete. It is',
+						'now safe to him to return to his spaceship',
+					];
+					
+					this.wizard.z_offset += 5;
+				} else {
+					this.overlay = [
+						'The villagers have successfully deterred Molikaw',
+						'Niwatanthatu\'a, who now retreats into his cave',
+						'until the next Tuesday.'
+					];
+				}
 				break;
 			case VillageState.MONSTER_WIN:
 				if (this.state_counter == FPS / CUTSCENE_SPEED_RATIO) {
@@ -286,9 +303,6 @@ class VillagersScene : AbstractScene {
 				} else if (this.state_counter == FPS * 8 / CUTSCENE_SPEED_RATIO) {
 					this.switch_scene(new TitleScene());
 				}
-				break;
-			case VillageState.WIZARD_WIN:
-				allow_input = false;
 				break;
 			default:
 				$assert(false, "Unknown state.");
