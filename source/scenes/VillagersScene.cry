@@ -187,6 +187,9 @@ class VillagersScene : AbstractScene {
 				if (this.monster.life_percent < .001) {
 					this.set_state(VillageState.VILLAGER_WIN);
 					this.monster.target_coord = [.5, .595];
+				} else if (!this.are_any_villagers_alive()) {
+					this.set_state(VillageState.MONSTER_WIN);
+					
 				}
 				break;
 			case VillageState.FIGHT_PRE_WIZARD:
@@ -216,6 +219,15 @@ class VillagersScene : AbstractScene {
 				];
 				break;
 			case VillageState.MONSTER_WIN:
+				if (this.state_counter == FPS / CUTSCENE_SPEED_RATIO) {
+					this.overlay = [
+						'Molikaw Niwatanthatu\'a, realizing his rage has',
+						'resulted in no longer having any friends to play',
+						'with, is now overcome with sadness.'
+					];
+				} else if (this.state_counter == FPS * 8 / CUTSCENE_SPEED_RATIO) {
+					this.switch_scene(new TitleScene());
+				}
 				break;
 			case VillageState.WIZARD_WIN:
 				allow_input = false;
@@ -325,6 +337,15 @@ class VillagersScene : AbstractScene {
 		
 		this.counter++;
 		this.state_counter++;
+	}
+	
+	function are_any_villagers_alive() {
+		for (villager : this.villagers) {
+			if (!villager.is_dead) {
+				return true;
+			}
+		}
+		return false;
 	}
 	
 	function render_hud() {

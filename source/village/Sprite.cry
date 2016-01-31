@@ -109,7 +109,7 @@ class Sprite {
 		} else if (this.is_villager) {
 			this.spear_cooldown--;
 			if (this.on_fire_counter >= 0) {
-				this.take_damage(.01);
+				this.take_damage(.01 * FIRE_POWER_RATIO);
 				this.on_fire_counter--;
 			}
 		} else if (this.is_spear) {
