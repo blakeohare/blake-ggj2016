@@ -5,18 +5,23 @@ class AsteroidsSprite {
 		this.y = y;
 		this.dx = 0;
 		this.dy = 0;
-		this.radius = 70;
+		this.radius = 40;
 		this.size = 3; // 1, 2, or 3
 		this.is_active = false;
 		this.angle = 3 * PI / 2;
 		this.vx = $random();
 		this.vy = $random();
 		this.is_dead = false;
+		this.facing = [1.0, 0];
+		
+		this.is_bullet = this.id == 'bullet';
 		
 		if (this.id[0] == 'V') {
 			this.color = get_villager_color(this.id);
 			if (this.color[0] == 0 && this.color[1] == 0 && this.color[2] == 0) {
 				this.color = [60, 60, 60];
+			} else if (this.color[0] == 255 && this.color[1] == 255 && this.color[2] == 255) {
+				this.color = [220, 220, 220];
 			}
 		}
 		
@@ -28,8 +33,10 @@ class AsteroidsSprite {
 	function update() {
 		this.x += this.vx;
 		this.y += this.vy;
-		this.x = this.x % SCREEN_WIDTH;
-		this.y = this.y % SCREEN_HEIGHT;
+		if (!this.is_bullet) {
+			this.x = this.x % SCREEN_WIDTH;
+			this.y = this.y % SCREEN_HEIGHT;
+		}
 	}
 	
 	function render(xoffset, yoffset) {
@@ -41,12 +48,29 @@ class AsteroidsSprite {
 		} else if (this.id == 'M') {
 			x = $floor(this.x);
 			y = $floor(this.y);
-			$gfx_draw_rectangle(x - 4 + xoffset, y - 4 + yoffset, 8, 8, 255, 255, 255, 255);
+			
+			ang = $arctan2(this.facing[1], this.facing[0]);
+			lang = ang + PI * 3 / 4;
+			rang = ang - PI * 3 / 4;
+			
+			ax = $floor($cos(ang) * 10 + x);
+			ay = $floor($sin(ang) * 10 + y);
+			bx = $floor($cos(lang) * 10 + x);
+			by = $floor($sin(lang) * 10 + y);
+			cx = $floor($cos(rang) * 10 + x);
+			cy = $floor($sin(rang) * 10 + y);
+			
+			$gfx_draw_triangle(ax, ay, bx, by, cx, cy, 255, 255, 255, 255);
 		} else {
 			x = $floor(this.x);
 			y = $floor(this.y);
 			color = this.color;
-			$gfx_draw_rectangle(x - 4 + xoffset, y - 4 + yoffset, 8, 8, color[0], color[1], color[2], 255);
+			r = this.radius;
+			if (this.is_active) {
+				$gfx_draw_ellipse(x - r + xoffset, y - r + yoffset, r * 2, r * 2, 255, 255, 255, 255);
+			}
+			r -= 5;
+			$gfx_draw_ellipse(x - r + xoffset, y - r + yoffset, r * 2, r * 2, color[0], color[1], color[2], 255);
 		}
 	}
 }
@@ -65,6 +89,8 @@ class AsteroidsScene : AbstractScene {
 		
 		this.asteroids_list_by_player = {};
 		this.asteroids_index_by_player = {};
+		
+		this.bullet_cooldown = -1;
 		
 		this.bullets = [];
 		
@@ -89,20 +115,34 @@ class AsteroidsScene : AbstractScene {
 	}
 	
 	function shoot() {
-		
+		if (this.bullet_cooldown < 0) {
+			this.bullet_cooldown = 4;
+			bullet = new AsteroidsSprite('bullet', this.wizard.x, this.wizard.y);
+			
+			vx = this.wizard.vx;
+			vy = this.wizard.vy;
+			vx += this.wizard.facing[0] * 6;
+			vy += this.wizard.facing[1] * 6;
+			bullet.vx = vx;
+			bullet.vy = vy;
+			
+			this.bullets.add(bullet);
+		}
 	}
 	
 	function update(events, mx, my) {
 	
+		this.bullet_cooldown--;
+		
 		for (event : events) {
 			if (event.is_gamepad && event.name == 'attack') {
 				player_id = CONTEXT.config_id_to_game_id.get(event.device.id, null);
 				if (player_id == 'M') {
 					this.shoot();
-				} else if (player_id != null) {
+				} else if (player_id != null && event.value == true) {
 					list = this.asteroids_list_by_player.get(player_id, null);
 					if (list != null && list.length > 0) {
-						this.asteroids_index_by_player = (this.asteroids_index_by_player + 1) % list.length;
+						this.asteroids_index_by_player[player_id] = (this.asteroids_index_by_player[player_id] + 1) % list.length;
 					}
 				}
 			}
@@ -115,6 +155,13 @@ class AsteroidsScene : AbstractScene {
 			if (player_id != null) {
 				if (player_id == 'M') {
 					sprite = this.wizard;
+					dx = dir[0];
+					dy = dir[1];
+					dist = (dx ** 2 + dy ** 2) ** .5;
+					if (dist > .000001) {
+						this.wizard.facing = [dx / dist, dy / dist];
+					}
+					
 				} else if (player_id != null) {
 					list = this.asteroids_list_by_player.get(player_id, null);
 					if (list != null && list.length > 0) {
@@ -125,6 +172,14 @@ class AsteroidsScene : AbstractScene {
 					v = sprite.v;
 					sprite.vx += dir[0] * v;
 					sprite.vy += dir[1] * v;
+					
+					vx = sprite.vx;
+					vy = sprite.vy;
+					vv = (vx ** 2 + vy ** 2) ** .5;
+					if (vv > 5) {
+						sprite.vx = vx * 5 / vv;
+						sprite.vy = vy * 5 / vv;
+					}
 				}
 			}
 		}
@@ -148,8 +203,64 @@ class AsteroidsScene : AbstractScene {
 						}
 						--i;
 					} else {
+						item.is_active = i == index;
 						asteroids.add(item);
 					}
+				}
+			}
+		}
+		
+		new_bullets = [];
+		for (bullet : this.bullets) {
+			if (bullet.is_dead || bullet.x < 2 || bullet.y > SCREEN_HEIGHT - 3|| bullet.x > SCREEN_WIDTH - 3|| bullet.y < 2) {
+				bullet.is_dead = true;
+			} 
+			
+			
+			for (asteroid : asteroids) {
+				dx = asteroid.x - bullet.x;
+				dy = asteroid.y - bullet.y;
+				dist = dx ** 2 + dy ** 2;
+				if (dist < asteroid.radius ** 2) {
+					bullet.is_dead = true;
+					if (asteroid.size == 1) {
+						asteroid.is_dead = true;
+					} else {
+						asteroid.size--;
+						asteroid.radius -= 13;
+						new_asteroid = new AsteroidsSprite(asteroid.id, asteroid.x, asteroid.y);
+						new_asteroid.vx = $random() * 2;
+						new_asteroid.vy = $random() * 2;
+						new_asteroid.radius = asteroid.radius;
+						new_asteroid.size = asteroid.size;
+						
+						asteroid.vx = $random() * 2;
+						asteroid.vy = $random() * 2;
+						this.asteroids_list_by_player[asteroid.id].add(new_asteroid);
+					}
+					break;
+				}
+			}
+			
+			if (!bullet.is_dead) {
+				new_bullets.add(bullet);
+			}
+		}
+		this.bullets = new_bullets;
+		
+		if (asteroids.length == 0) {
+			this.switch_scene(new TitleScene());
+		}
+		
+		wx = this.wizard.x;
+		wy = this.wizard.y;
+		for (asteroid : asteroids) {
+			if (!asteroid.is_dead) {
+				dx = wx - asteroid.x;
+				dy = wy - asteroid.y;
+				dist = dx ** 2 + dy ** 2;
+				if (dist < asteroid.radius ** 2) {
+					this.switch_scene(new AsteroidsScene());
 				}
 			}
 		}

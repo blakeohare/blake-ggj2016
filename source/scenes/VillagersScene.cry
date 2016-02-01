@@ -281,7 +281,11 @@ class VillagersScene : AbstractScene {
 						if (this.state_counter > FPS * 10 / CUTSCENE_SPEED_RATIO) {
 							if (this.state == VillageState.WIZARD_WIN) {
 								if (this.wizard.z_offset > SCREEN_HEIGHT) {
-									this.switch_scene(new TitleScene());
+									if (ASTEROIDS_ENABLED) {
+										this.switch_scene(new AsteroidsScene());
+									} else {
+										this.switch_scene(new TitleScene());
+									}
 								}
 							} else {
 								this.switch_scene(new TitleScene());
