@@ -6,9 +6,13 @@ class LoadingScene : AbstractScene {
 
 	function game_initializer() {
 		
+		if (ASTEROIDS_ENABLED && START_WITH_ASTEROIDS) {
+			return new AsteroidsScene();
+		}
 		//scene = new TraceScene(null, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
 		//scene = new EditorScene();
 		scene = new TitleScene();
+		
 		return scene;
 	}
 	

@@ -12,6 +12,9 @@ CUTSCENE_SPEED_RATIO = 1; //3;
 
 ENABLE_BOTH = true;
 
+ASTEROIDS_ENABLED = true;
+START_WITH_ASTEROIDS = true;
+
 VILLAGER_COUNT = 12;
 
 import 'enums.cry';

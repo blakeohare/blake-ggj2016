@@ -1,13 +1,187 @@
+class AsteroidsSprite {
+	constructor(id, x, y) {
+		this.id = id;
+		this.x = x;
+		this.y = y;
+		this.dx = 0;
+		this.dy = 0;
+		this.radius = 70;
+		this.size = 3; // 1, 2, or 3
+		this.is_active = false;
+		this.angle = 3 * PI / 2;
+		this.vx = $random();
+		this.vy = $random();
+		this.is_dead = false;
+		
+		if (this.id[0] == 'V') {
+			this.color = get_villager_color(this.id);
+			if (this.color[0] == 0 && this.color[1] == 0 && this.color[2] == 0) {
+				this.color = [60, 60, 60];
+			}
+		}
+		
+		this.v = id == 'M' ? 3.0 : 1.0;
+		
+		this.v *= .12;
+	}
+	
+	function update() {
+		this.x += this.vx;
+		this.y += this.vy;
+		this.x = this.x % SCREEN_WIDTH;
+		this.y = this.y % SCREEN_HEIGHT;
+	}
+	
+	function render(xoffset, yoffset) {
+		
+		if (this.id == 'bullet') {
+			x = $floor(this.x);
+			y = $floor(this.y);
+			$gfx_draw_rectangle(x - 1 + xoffset, y - 1 + yoffset, 2, 2, 255, 255, 255, 255);
+		} else if (this.id == 'M') {
+			x = $floor(this.x);
+			y = $floor(this.y);
+			$gfx_draw_rectangle(x - 4 + xoffset, y - 4 + yoffset, 8, 8, 255, 255, 255, 255);
+		} else {
+			x = $floor(this.x);
+			y = $floor(this.y);
+			color = this.color;
+			$gfx_draw_rectangle(x - 4 + xoffset, y - 4 + yoffset, 8, 8, color[0], color[1], color[2], 255);
+		}
+	}
+}
+
 class AsteroidsScene : AbstractScene {
 	constructor() : base() {
+		
+		this.device_ids_configured = [];
+		for (i = 0; i < $gamepad_count(); ++i) {
+			device = $gamepad_get_device(i);
+			device_id = device.id;
+			if (device_id != null) {
+				this.device_ids_configured.add(device_id);
+			}
+		}
+		
+		this.asteroids_list_by_player = {};
+		this.asteroids_index_by_player = {};
+		
+		this.bullets = [];
+		
+		this.wizard = new AsteroidsSprite('M', SCREEN_WIDTH / 2.0, SCREEN_HEIGHT / 2.0);
+		for (i = 1; i <= VILLAGER_COUNT; ++i) {
+			list = [];
+			id = 'V' + i;
+			theta = TWO_PI * i / VILLAGER_COUNT;
+			x = ($cos(theta) + 1) * SCREEN_WIDTH / 2;
+			y = ($sin(theta)  + 1) * SCREEN_HEIGHT / 2;
+			
+			x = (x * 4 + SCREEN_WIDTH / 2) / 5;
+			y = (y * 7 + SCREEN_HEIGHT / 2) / 8;
+			
+			sprite = new AsteroidsSprite(id, x, y);
+			list.add(sprite);
+			this.asteroids_list_by_player[id] = [sprite];
+			this.asteroids_index_by_player[id] = 0;
+		}
+		
+		this.sprites = [];
+	}
 	
+	function shoot() {
+		
 	}
 	
 	function update(events, mx, my) {
 	
+		for (event : events) {
+			if (event.is_gamepad && event.name == 'attack') {
+				player_id = CONTEXT.config_id_to_game_id.get(event.device.id, null);
+				if (player_id == 'M') {
+					this.shoot();
+				} else if (player_id != null) {
+					list = this.asteroids_list_by_player.get(player_id, null);
+					if (list != null && list.length > 0) {
+						this.asteroids_index_by_player = (this.asteroids_index_by_player + 1) % list.length;
+					}
+				}
+			}
+		}
+		
+		for (device_id : this.device_ids_configured) {
+			dir = $gamepad_get_state(device_id, 'dir');
+			
+			player_id = CONTEXT.config_id_to_game_id.get(device_id, null);
+			if (player_id != null) {
+				if (player_id == 'M') {
+					sprite = this.wizard;
+				} else if (player_id != null) {
+					list = this.asteroids_list_by_player.get(player_id, null);
+					if (list != null && list.length > 0) {
+						sprite = list[this.asteroids_index_by_player[player_id]];
+					}
+				}
+				if (sprite != null) {
+					v = sprite.v;
+					sprite.vx += dir[0] * v;
+					sprite.vy += dir[1] * v;
+				}
+			}
+		}
+		
+		this.sprites = [this.wizard];
+		asteroids = [];
+		
+		for (key : this.asteroids_list_by_player.keys()) {
+			list = this.asteroids_list_by_player[key];
+			if (list != null && list.length > 0) {
+				new_list = [];
+				index = this.asteroids_index_by_player[key];
+				for (i = 0; i < list.length; ++i) {
+					item = list[i];
+					if (item.is_dead) {
+						list.remove(i);
+						
+						if (index >= i) {
+							index = index % list.length;
+							this.asteroids_index_by_player[key] = index;
+						}
+						--i;
+					} else {
+						asteroids.add(item);
+					}
+				}
+			}
+		}
+		
+		this.sprites = asteroids + [this.wizard];
+		this.sprites.concat(this.bullets);
+		
+		for (sprite : this.sprites) {
+			sprite.update();
+		}
 	}
 	
 	function render(rc) {
-	
+		H_LEFT = [0, 1];
+		H_RIGHT = [0, -1];
+		H_CENTER = [0];
+		V_TOP = [0, 1];
+		V_BOTTOM = [0, -1];
+		V_CENTER = [0];
+		for (sprite : this.sprites) {
+			h = H_CENTER;
+			if (sprite.x < SCREEN_WIDTH / 5) h = H_LEFT;
+			else if (sprite.x > SCREEN_WIDTH * 4 / 5) h = H_RIGHT;
+			v = V_CENTER;
+			if (sprite.y < SCREEN_HEIGHT / 5) v = V_TOP;
+			else if (sprite.y > SCREEN_HEIGHT * 4 / 5)  v = V_BOTTOM;
+			
+			for (xo : h) {
+				for (yo : v) {
+					sprite.render(SCREEN_WIDTH * xo, SCREEN_HEIGHT * yo);
+				}
+			}
+		}
 	}
 }
